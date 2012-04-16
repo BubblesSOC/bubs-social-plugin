@@ -1,0 +1,22 @@
+#bsp-tweet-error,
+#bsp-tweet-success,
+.bsp-hidden {
+  display: none;
+}
+
+#bsp-tweetbox {
+  width: 100%;
+}
+
+#bsp-tweet-button-div {
+  padding-top: 8px;
+  text-align: right;
+}
+
+#bsp-tweet-this-spinner {
+  vertical-align: middle;
+}
+
+#tumblrdiv .wp_themeSkin iframe {
+  background: #fff;
+}

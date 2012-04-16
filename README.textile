@@ -1,0 +1,3 @@
+h1. Bubs' Social Plugin
+
+Integrates my social accounts into my WordPress blog. Also allows commenters to comment using their Facebook or Twitter accounts. Uses "OAuthSimple":https://github.com/jrconlin/oauthsimple by jr conlin for OAuth signing.
