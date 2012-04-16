@@ -48,7 +48,6 @@ class Bubs_Social_Plugin {
       add_action('admin_enqueue_scripts', array($this, 'adminJS'));
       add_action('admin_print_styles', array($this, 'adminCSS'));
     }
-    add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'actionLinks'));
     add_action('wp_enqueue_scripts', array($this, 'socialJS'));
     add_action('wp_footer', array($this, 'embeddedJS'));
 
@@ -89,11 +88,6 @@ EOD;
 
   function adminCSS() {
     wp_enqueue_style('bsp_admin_css', plugins_url('/includes/bsp-admin.css', __FILE__));
-  }
-  
-  function actionLinks( $actions ) {
-    $actions[] = '<a href="options-general.php?page='. BSP_PLUGIN_SLUG .'">Settings</a>';
-    return $actions;
   }
   
   /**
