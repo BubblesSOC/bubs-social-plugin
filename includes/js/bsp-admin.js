@@ -32,7 +32,7 @@ jQuery(function() {
   tweetPost.setCharCount();
   
   tweetPost.checkbox.bind('click', function() {
-    if ($(this).attr('checked') == 'checked') {
+    if ($(this).prop('checked')) {
       tweetPost.buttonDiv.hide();
     }
     else {
