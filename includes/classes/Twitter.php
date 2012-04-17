@@ -5,7 +5,6 @@
  * @package Bubs_Social_Plugin
  * @since 1.0
  */
-
 class MyTwitter extends MySocial_Oauth {
   function __construct() {
     $this->apiUrl = "http://api.twitter.com/1/";
@@ -21,7 +20,7 @@ class MyTwitter extends MySocial_Oauth {
     
     // Add @Anywhere
     // Ref: https://dev.twitter.com/docs/anywhere/welcome
-    add_action( 'wp_enqueue_scripts', array($this, 'addAnywhereJS') );
+    add_action( 'wp_enqueue_scripts', array($this, 'anywhereJS') );
     
     // Tweet Post on Publish
     add_action( 'add_meta_boxes', array($this, 'addMetaBox') );
@@ -41,7 +40,7 @@ class MyTwitter extends MySocial_Oauth {
     return $response_body;
   }
   
-  function addAnywhereJS() {
+  function anywhereJS() {
     wp_enqueue_script( 'twitter_anywhere', 'http://platform.twitter.com/anywhere.js?id='. TWITTER_CONSUMER_KEY .'&v=1' );
   }
   
@@ -71,34 +70,15 @@ EOD;
       $post = get_post($parent_id);
     
     $tweet_link = get_post_meta($post->ID, 'tweet_link');
-    $tweet_error = get_post_meta($post->ID, 'tweet_error');
     
     if ( empty($tweet_link) ) {
       // Handle custom errors
-      $error_display = '';
-      $error_message = '';
-      if ( !empty($tweet_error) ) {
-        delete_post_meta($post->ID, 'tweet_error');
-        $error_display = 'display: block;';
-        $error_message = $tweet_error[0];
-      }
-      echo '<div id="bsp-tweet-error" class="error" style="'. $error_display .'"><p>Your last attempt to tweet this post failed: <strong id="bsp-tweet-error-message">'. $error_message .'</strong></p></div>';
-      echo '<div id="bsp-tweet-success" class="updated"><p>Tweeted! <a href="#" id="bsp-tweet-success-link">View Tweet</a></p></div>';
+      $this->_tweetErrorNotice($post);
+      $this->_tweetSuccessNotice();
       
-      $tweet_text = '';
-      if ( $post->post_status == 'publish' ) {
-        $tweet_text .= $post->post_title .': ';
-      }
-      $shortlink = get_post_meta($post->ID, 'bitly_link');
-      if ( empty($shortlink) ) {
-        $tweet_text .= '[shortlink]';
-      }
-      else {
-        $tweet_text .= $shortlink[0];
-      }
       echo '<div id="bsp-tweet-container">';
       wp_nonce_field('bsp-tweet-post', 'bsp-tweet-post-nonce');
-      echo '<textarea rows="3" cols="30" maxlength="140" name="bsp_tweet_text" id="bsp-tweetbox">'. $tweet_text .'</textarea><br />';
+      echo '<textarea rows="3" cols="30" maxlength="140" name="bsp_tweet_text" id="bsp-tweetbox">'. $this->_getTweetText($post) .'</textarea><br />';
       echo 'Characters Remaining: <strong id="bsp-char-count">140</strong><br /><br />';
       echo '<input type="checkbox" id="bsp-tweet-this" name="bsp_tweet_this" value="true" /> ';
       echo '<label for="bsp-tweet-this">Tweet this when post is published</label>';
@@ -111,6 +91,42 @@ EOD;
       // Display tweet permalink
       echo '<a href="'. $tweet_link[0] .'" id="bsp-tweet-permalink">Tweet Permalink</a>';
     }
+  }
+  
+  private function _tweetErrorNotice( $post ) {
+    // Custom error for post metabox
+    $tweet_error = get_post_meta($post->ID, 'tweet_error');
+    if ( !empty($tweet_error) ) {
+      delete_post_meta($post->ID, 'tweet_error');
+      $display = ' style="display: block;"';
+      $message = $tweet_error[0];
+    }
+    else {
+      $display = '';
+      $message = '';
+    }
+    echo '<div id="bsp-tweet-error" class="error"'. $display .'><p>Your last attempt to tweet this post failed: <strong id="bsp-tweet-error-message">'. $message .'</strong></p></div>';
+  }
+  
+  private function _tweetSuccessNotice() {
+    // Custom success for post metabox
+    echo '<div id="bsp-tweet-success" class="updated"><p>Tweeted! <a href="#" id="bsp-tweet-success-link">View Tweet</a></p></div>';
+  }
+  
+  private function _getTweetText( $post ) {
+    // Default tweet text for post metabox
+    $tweet_text = '';
+    if ( $post->post_status == 'publish' ) {
+      $tweet_text .= $post->post_title .': ';
+    }
+    $shortlink = get_post_meta($post->ID, 'bitly_link');
+    if ( empty($shortlink) ) {
+      $tweet_text .= '[shortlink]';
+    }
+    else {
+      $tweet_text .= $shortlink[0];
+    }
+    return $tweet_text;
   }
   
   function tweetPostOnPublish( $new_status, $old_status, $post ) {
