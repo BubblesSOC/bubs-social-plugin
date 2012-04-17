@@ -94,7 +94,7 @@ EOD;
   }
   
   private function _tweetErrorNotice( $post ) {
-    // Custom error for post metabox
+    // Custom error notice for post metabox
     $tweet_error = get_post_meta($post->ID, 'tweet_error');
     if ( !empty($tweet_error) ) {
       delete_post_meta($post->ID, 'tweet_error');
@@ -109,7 +109,7 @@ EOD;
   }
   
   private function _tweetSuccessNotice() {
-    // Custom success for post metabox
+    // Custom success notice for post metabox
     echo '<div id="bsp-tweet-success" class="updated"><p>Tweeted! <a href="#" id="bsp-tweet-success-link">View Tweet</a></p></div>';
   }
   
