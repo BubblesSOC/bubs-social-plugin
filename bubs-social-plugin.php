@@ -43,11 +43,8 @@ class Bubs_Social_Plugin {
     $this->_myLastfm = new MyLastFM();
     $this->_myGithub = new MyGithub();
     
-    // Only add admin CSS & JS to admin post pages
-    if ( is_admin() && (basename($_SERVER['PHP_SELF']) == 'post.php' || basename($_SERVER['PHP_SELF']) == 'post-new.php') ) {
-      add_action('admin_enqueue_scripts', array($this, 'adminJS'));
-      add_action('admin_print_styles', array($this, 'adminCSS'));
-    }
+    add_action('admin_enqueue_scripts', array($this, 'adminJS'));
+    add_action('admin_print_styles', array($this, 'adminCSS'));
     add_action('wp_enqueue_scripts', array($this, 'socialJS'));
     add_action('wp_footer', array($this, 'embeddedJS'));
 
@@ -82,12 +79,21 @@ class Bubs_Social_Plugin {
 EOD;
   }
   
+  /**
+   * Only include admin CSS and JS on admin post pages
+   *
+   * @global string $pagenow
+   */
   function adminJS() {
-    wp_enqueue_script('bsp_admin_js', plugins_url('/includes/js/bsp-admin.js', __FILE__), array('jquery'));
+    global $pagenow;
+    if ( $pagenow == 'post.php' || $pagenow == 'post-new.php' )
+      wp_enqueue_script('bsp_admin_js', plugins_url('/includes/js/bsp-admin.js', __FILE__), array('jquery'));
   }
 
   function adminCSS() {
-    wp_enqueue_style('bsp_admin_css', plugins_url('/includes/bsp-admin.css', __FILE__));
+    global $pagenow;
+    if ( $pagenow == 'post.php' || $pagenow == 'post-new.php' )
+      wp_enqueue_style('bsp_admin_css', plugins_url('/includes/bsp-admin.css', __FILE__));
   }
   
   /**
