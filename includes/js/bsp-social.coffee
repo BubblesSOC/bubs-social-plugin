@@ -51,12 +51,6 @@ class SocialConnect
       @viaRadio = $('#comment-via-' + service)
       @viaRadio.click =>
         window.wpComments.hideCommenterInfo()
-        # $.cookie 'bspCommentAuthor', commentAuthor.input.val()
-        # $.cookie 'bspCommentEmail', commentEmail.input.val()
-        # $.cookie 'bspCommentUrl', commentUrl.input.val()
-        # commentAuthor.input.val @userInfo.name
-        # commentEmail.input.val 'social@bubblessoc.net'
-        # commentUrl.input.val @userInfo.profileLink.value
         userInfoFields
           .fill(@userInfo.name, @userInfo.profileImage.value, @userInfo.profileLink.value)
           .enable()
@@ -126,12 +120,6 @@ $ ->
   viaWpRadio = $('#comment-via-wordpress')
   userInfoFields.init()
   viaWpRadio.click ->
-    # if $.cookie('bspCommentAuthor') != null
-    #   commentAuthor.input.val $.cookie('bspCommentAuthor')
-    # if $.cookie('bspCommentEmail') != null
-    #   commentEmail.input.val $.cookie('bspCommentEmail')
-    # if $.cookie('bspCommentUrl') != null
-    #   commentUrl.input.val $.cookie('bspCommentUrl')
     window.wpComments.showCommenterInfo()
     userInfoFields.disable()
   commentSubmit.click (e) ->
