@@ -34,9 +34,32 @@ abstract class MySocial {
    * Initializes the cache array
    *
    * @uses MySocial::$cacheOptionName
+   * @param array $keys Array containing the names of the sub-caches (i.e. indices)
    */
-  protected function initCache() {
-    $this->cache = get_option( $this->cacheOptionName, array( 'timestamp' => 0, 'items' => array() ) );
+  protected function initCache( $keys ) {
+    $default_cache = array_fill_keys( $keys, array('timestamp' => 0, 'items' => array()) );
+    $this->cache = get_option( $this->cacheOptionName, $default_cache );
+    
+    // Additional keys can be added after the WordPress option is created
+    // The additional keys (with default vals) should be added to the cache array
+    foreach ( array_diff_key($default_cache, $this->cache) as $key => $val ) {
+      $this->cache[$key] = $val;
+    }
+  }
+  
+  /**
+   * Updates the cache array and WordPress option
+   *
+   * @uses MySocial::$cacheOptionName
+   * @uses MySocial::$cache
+   *
+   * @param string $key
+   * @param array $items
+   */
+  protected function updateCache( $key, $items ) {
+    $this->cache[$key]['timestamp'] = time();
+    $this->cache[$key]['items'] = $items;
+    update_option( $this->cacheOptionName, $this->cache );
   }
   
   /**
@@ -51,20 +74,6 @@ abstract class MySocial {
   }
   
   /**
-   * Updates the cache array and WordPress option
-   *
-   * @uses MySocial::$cacheOptionName
-   * @uses MySocial::$cache
-   *
-   * @param array $items
-   */
-  protected function updateCache( $items ) {
-    $this->cache['timestamp'] = time();
-    $this->cache['items'] = $items;
-    update_option( $this->cacheOptionName, $this->cache );
-  }
-  
-  /**
    * Retrieves a URL using either HTTP GET or HTTP POST
    *
    * If the retrieval succeeds then the JSON response is decoded.
@@ -76,14 +85,15 @@ abstract class MySocial {
    *
    * @param string $resource_url
    * @param string $method get|post
+   *
    * @return WP_Error|array
    */
   protected function requestResource( $resource_url, $method = 'get' ) {
     $method = strtolower($method);
-    if ( $method == 'get' )
-      $response = wp_remote_get( $resource_url );
-    elseif ( $method == 'post' )
+    if ( $method == 'post' )
       $response = wp_remote_post( $resource_url );
+    else
+      $response = wp_remote_get( $resource_url );
 
     if ( is_wp_error($response) )
       return $response;
@@ -96,15 +106,13 @@ abstract class MySocial {
    *
    * @param string $response_code
    * @param array $response_body Decoded JSON
+   *
    * @return WP_Error|array
    */
   abstract protected function checkServiceError( $response_code, $response_body );
   
   /**
    * Prints a HTML comment containing the status of the last fetch (for debugging)
-   *
-   * @see MySocial::fetchItems()
-   * @see MyFlickr::printPublicPhotos()
    *
    * @uses is_wp_error()
    * @uses WP_Error::get_error_code()
@@ -127,20 +135,23 @@ abstract class MySocial {
   }
   
   /**
-   * Fetches items from service and caches them if a minute has passed since last cache 
+   * Fetches items from service and caches them if $fetch_interval seconds have passed since last cache 
    *
    * @uses MySocial::$cache
    * @uses MySocial::requestResource()
-   * @uses MySocial::parseResponse()
    * @uses MySocial::updateCache()
    *
+   * @param string $key
+   * @param string $parse_method Name of the method that parses the response
    * @param string $resource_url
+   * @param int    $fetch_interval Number of seconds between each fetch
+   *
    * @return WP_Error|bool Returns TRUE if no errors occurred
    */
-  protected function fetchItems( $resource_url ) {
-    $time_diff = time() - $this->cache['timestamp'];
+  protected function fetchItems( $key, $parse_method, $resource_url, $fetch_interval = 60 ) {
+    $time_diff = time() - $this->cache[$key]['timestamp'];
     
-    if ( $time_diff > 60 ) {
+    if ( $time_diff > $fetch_interval ) {
       // Fetch from Service
       $response = $this->requestResource( $resource_url );
       
@@ -148,24 +159,16 @@ abstract class MySocial {
         return $response;
       
       // Update Cache
-      $this->updateCache( $this->parseResponse($response) );
+      $this->updateCache( $key, call_user_func_array( array($this, $parse_method), array($response) ) );
     }
-    // Else: Fetch from Cache
+    // Else: Use Cache
     return true;
   }
-  
-  /**
-   * Iterates through the JSON returned from the service and creates an array of the items we want to cache
-   *
-   * @param array $response Decoded JSON
-   * @return array of items to be cached
-   */
-  abstract protected function parseResponse( $response );
 }
 
 abstract class MySocial_Oauth extends MySocial {
   /**
-   * Hash of OAuth signatures: {api_key:, shared_secret:, oauth_token: oauth_secret:}
+   * Hash of OAuth signatures: {api_key:, shared_secret:, oauth_token:, oauth_secret:}
    *
    * @see OAuthSimple::signatures()
    * @var array
@@ -182,6 +185,7 @@ abstract class MySocial_Oauth extends MySocial {
    * @param string $action GET,POST,DELETE,etc.
    * @param string $path Target service URL
    * @param array $params Optional. Hash of parameters to send to the service
+   *
    * @return string Signed URL
    */
   protected function getSignedURL( $action, $path, $params = array() ) {

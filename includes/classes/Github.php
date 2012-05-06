@@ -10,7 +10,7 @@ class MyGithub extends MySocial {
   function __construct() {
     $this->apiUrl = "https://api.github.com/";
     $this->cacheOptionName = 'github_cache';
-    $this->initCache();
+    $this->initCache( array('public_repos') );
     $this->hookAjax('bsp-print-repos', 'printPublicRepos');
   }
 
@@ -24,7 +24,7 @@ class MyGithub extends MySocial {
   function printPublicRepos() {
     $result = $this->_getPublicRepos();
     $this->printStatus($result);
-    foreach ( $this->cache['items'] as $repo ) {
+    foreach ( $this->cache['public_repos']['items'] as $repo ) {
       echo '<li><a href="'. $repo['url'] .'">'. $repo['name'] .'</a><p>'. $repo['description'] .'</p></li>' . "\n";
     }
     exit;
@@ -32,10 +32,10 @@ class MyGithub extends MySocial {
   
   private function _getPublicRepos() {
     // Ref: http://developer.github.com/v3/repos/
-    return $this->fetchItems( $this->apiUrl . 'users/bubblessoc/repos' );
+    return $this->fetchItems( 'public_repos', 'parsePublicReposResponse', $this->apiUrl . 'users/bubblessoc/repos', 60*60 );
   }
   
-  protected function parseResponse( $response ) {
+  function parsePublicReposResponse( $response ) {
     $repos = array_reverse($response);
     $items = array();
     for ($i=0; $i<3; $i++) {

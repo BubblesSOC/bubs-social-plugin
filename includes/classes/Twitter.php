@@ -15,7 +15,7 @@ class MyTwitter extends MySocial_Oauth {
       'access_secret' => TWITTER_ACCESS_TOKEN_SECRET
     );
     $this->cacheOptionName = 'twitter_cache';
-    $this->initCache();
+    $this->initCache( array('user_timeline') );
     $this->hookAjax('bsp-print-tweets', 'printUserTimeline');
     
     // Add @Anywhere
@@ -242,7 +242,7 @@ EOD;
   function printUserTimeline() {
     $result = $this->_getUserTimeline();
     $this->printStatus($result);
-    foreach ( $this->cache['items'] as $tweet ) {
+    foreach ( $this->cache['user_timeline']['items'] as $tweet ) {
       $tweet = $this->_convertUrls($tweet);
       $tweet = $this->_convertHashtags($tweet);
       $tweet = $this->_linkifyUsers($tweet);
@@ -297,10 +297,10 @@ EOD;
       'include_rts' => true,
       'include_entities' => true
     );
-    return $this->fetchItems( $this->getSignedURL("GET", $this->apiUrl . 'statuses/user_timeline.json', $params) );
+    return $this->fetchItems( 'user_timeline', 'parseUserTimelineResponse', $this->getSignedURL("GET", $this->apiUrl . 'statuses/user_timeline.json', $params) );
   }
   
-  protected function parseResponse( $response ) {
+  function parseUserTimelineResponse( $response ) {
     $items = array();
     foreach ( $response as $tweet ) {
       $item = array(

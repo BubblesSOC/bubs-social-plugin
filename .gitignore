@@ -1,5 +1,6 @@
 includes/oauth_keys.php
 includes/classes/Goodreads.php
-includes/classes/Tumblr.php
+includes/classes/Lastfm.php
+includes/classes/Pinterest.php
 includes/js/bsp-tumblr-admin.*
 old/*

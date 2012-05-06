@@ -7,9 +7,9 @@
  */
 class MyFlickr extends MySocial {
   function __construct() {
-    $this->apiUrl = "http://api.flickr.com/services/rest/?api_key=" . FLICKR_API_KEY;
+    $this->apiUrl = "http://api.flickr.com/services/rest/?api_key=" . FLICKR_API_KEY . "&format=json&nojsoncallback=1";
     $this->cacheOptionName = 'flickr_cache';
-    $this->initCache();
+    $this->initCache( array('public_photos', 'favorites') );
     $this->hookAjax('bsp-print-photos', 'printPublicPhotos');
   }
 
@@ -20,13 +20,10 @@ class MyFlickr extends MySocial {
     return $response_body;
   }
   
-  /**
-   * Content-loading function for Ajax
-   */
   function printPublicPhotos() {
     $result = $this->_getPublicPhotos();
     $this->printStatus($result);
-    foreach ( $this->cache['items'] as $photo ) {
+    foreach ( $this->cache['public_photos']['items'] as $photo ) {
       $title = htmlentities( $photo['title'], ENT_QUOTES, get_bloginfo('charset') );
       echo '<li><a href="'. $photo['link'] .'" title="'. $title .' by bubblessoc, on Flickr"><img src="'. $photo['url_sq'] .'" alt="'. $title .'" width="75" height="75" /></a></li>' . "\n";
     }
@@ -36,17 +33,15 @@ class MyFlickr extends MySocial {
   private function _getPublicPhotos() {
     // Ref: http://www.flickr.com/services/api/flickr.people.getPublicPhotos.html
     $params = array(
-      'format'   => 'json',
-      'nojsoncallback' => 1,
       'method'   => 'flickr.people.getPublicPhotos',
       'user_id'  => '13761781@N00',
-      'extras'   => 'date_upload,url_sq,url_t,url_s,url_m,url_o',
+      'extras'   => 'date_upload,url_sq',
       'per_page' => 5
     );
-    return $this->fetchItems( $this->apiUrl . '&' . http_build_query($params) );
+    return $this->fetchItems( 'public_photos', 'parsePublicPhotosResponse', $this->apiUrl . '&' . http_build_query($params), 60*60 );
   }
   
-  protected function parseResponse( $response ) {
+  function parsePublicPhotosResponse( $response ) {
     $items = array();
     foreach ( $response->photos->photo as $photo ) {
       $item = array(
@@ -54,6 +49,56 @@ class MyFlickr extends MySocial {
         'title' => $photo->title,
         'dateupload' => $photo->dateupload,
         'url_sq' => $photo->url_sq
+      );
+      array_push($items, $item);
+    }
+    return $items;
+  }
+  
+  function getLikesCache() {
+    $this->_getFavorites();
+    return $this->cache['favorites']['items'];
+  }
+  
+  private function _getFavorites() {
+    // Ref: http://www.flickr.com/services/api/flickr.favorites.getPublicList.html
+    $params = array(
+      'method'   => 'flickr.favorites.getPublicList',
+      'user_id'  => '13761781@N00',
+      'extras'   => 'owner_name,url_sq',
+      'per_page' => 5
+    );
+    return $this->fetchItems( 'favorites', 'parseFavoritesResponse', $this->apiUrl . '&' . http_build_query($params), 60*60 );
+  }
+  
+  private function _getUserInfo( $user_id ) {
+    // Ref: http://www.flickr.com/services/api/flickr.people.getInfo.html
+    $params = array(
+      'method'   => 'flickr.people.getInfo',
+      'user_id'  => $user_id
+    );
+    return $this->requestResource( $this->apiUrl . '&' . http_build_query($params) );
+  }
+  
+  function parseFavoritesResponse( $response ) {
+    $items = array();
+    foreach ( $response->photos->photo as $photo ) {
+      // $user_info = $this->_getUserInfo( $photo->owner );
+      // if ( is_wp_error($user_info) ) {
+      //   $photosurl = "http://www.flickr.com/photos/{$photo->owner}/";
+      // }
+      // else {
+      //   $photosurl = $user_info->person->photosurl->_content;
+      // }
+      $item = array(
+        'service' => 'flickr',
+        'id' => $photo->id,
+        'owner_id' => $photo->owner,
+        'owner_name' => $photo->ownername,
+        'timestamp' => $photo->date_faved,
+        'title' => $photo->title,
+        'url_sq' => $photo->url_sq,
+        'link' => "http://www.flickr.com/photos/{$photo->owner}/{$photo->id}"
       );
       array_push($items, $item);
     }

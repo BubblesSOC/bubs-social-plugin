@@ -11,8 +11,6 @@ class MyGooglePlus extends MySocial_Oauth {
   protected function checkServiceError( $response_code, $response_body ) {
     return $response_body;
   }
-
-  protected function parseResponse( $response ) {}
     
   function embeddedJS() {
     return <<<EOD
@@ -25,7 +23,7 @@ EOD;
   }
   
   function shareButton( $permalink ) {
-    return '<div class="g-plusone" data-size="small" data-href="'. $permalink .'"></div>';
+    return '<div class="g-plusone" data-size="medium" data-href="'. $permalink .'"></div>';
   }
 }
 ?>

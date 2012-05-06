@@ -11,13 +11,19 @@ Author URI: http://bubblessoc.net
 require_once('includes/oauth_keys.php');  // Service-related constants defined here
 require_once('includes/classes/OAuthSimple.php');
 require_once('includes/classes/MySocial.php');
+require_once('includes/classes/Dribbble.php');
 require_once('includes/classes/Facebook.php');
 require_once('includes/classes/Flickr.php');
 require_once('includes/classes/Github.php');
 require_once('includes/classes/GooglePlus.php');
-require_once('includes/classes/Lastfm.php');
+// require_once('includes/classes/Lastfm.php');
+// require_once('includes/classes/Pinterest.php');
+require_once('includes/classes/Tumblr.php');
 require_once('includes/classes/Twitter.php');
+
 define('BSP_PLUGIN_SLUG', "bubs-social-plugin");
+define('BSP_DIR_PATH', plugin_dir_path(__FILE__));
+define('BSP_DIR_URL', plugin_dir_url(__FILE__));
 
 /**
  * BSP (Bubs' Social Plugin) Base Class
@@ -28,20 +34,26 @@ define('BSP_PLUGIN_SLUG', "bubs-social-plugin");
  * @since 1.0
  */
 class Bubs_Social_Plugin {
-  private $_myTwitter;
+  private $_myDribbble;
   private $_myFacebook;
-  private $_myGooglePlus;
   private $_myFlickr;
-  private $_myLastfm;
   private $_myGithub;
+  private $_myGooglePlus;
+  // private $_myLastfm;
+  // private $_myPinterest;
+  private $_myTumblr;
+  private $_myTwitter;
   
   function __construct() {
-    $this->_myTwitter = new MyTwitter();
+    $this->_myDribbble = new MyDribbble();
     $this->_myFacebook = new MyFacebook();
-    $this->_myGooglePlus = new MyGooglePlus();
     $this->_myFlickr = new MyFlickr();
-    $this->_myLastfm = new MyLastFM();
     $this->_myGithub = new MyGithub();
+    $this->_myGooglePlus = new MyGooglePlus();
+    // $this->_myLastfm = new MyLastFM();
+    // $this->_myPinterest = new MyPinterest();
+    $this->_myTumblr = new MyTumblr();
+    $this->_myTwitter = new MyTwitter();
     
     add_action('admin_enqueue_scripts', array($this, 'adminJS'));
     add_action('admin_print_styles', array($this, 'adminCSS'));
@@ -58,16 +70,19 @@ class Bubs_Social_Plugin {
   	
   	// Social Sharing
   	add_action('bsp_share_buttons', array($this, 'socialSharing'), 10, 2);
+  	add_filter('bsp_facebook_metatag', array($this, 'addFacebookMetaTag'));
+  	
+  	// Hook Ajax for Likes
+  	add_action('wp_ajax_nopriv_bsp-print-likes', array($this, 'printLikes'));
+    add_action('wp_ajax_bsp-print-likes', array($this, 'printLikes'));
   }
   
   function socialJS() {
-    // wp_enqueue_script('jquery_cookie', plugins_url('/includes/jquery.cookie.js', __FILE__), array('jquery'), false, true);
-    // wp_enqueue_script('bsp_social_js', plugins_url('/includes/bsp-social.js', __FILE__), array('jquery', 'jquery_cookie', 'rk_wpcomments_js'), false, true);
     wp_enqueue_script('bsp_social_js', plugins_url('/includes/js/bsp-social.js', __FILE__), array('jquery', 'rk_wpcomments_js'), false, true);
   }
   
   /**
-   * Load the services' JS for client-side functionality
+   * Loads the services' JS for client-side functionality
    */
   function embeddedJS() {
     echo <<<EOD
@@ -97,7 +112,7 @@ EOD;
   }
   
   /**
-   * Add social info (service, name, profile image, profile link) as comment meta
+   * Adds social info (service, name, profile image, profile link) as comment meta
    *
    * Action Hook: 
    * <code>
@@ -114,7 +129,7 @@ EOD;
   }
   
   /**
-   * Replace Gravatar with profile photo
+   * Replaces Gravatar with profile photo
    *
    * Filter Hook: 
    * <code>
@@ -135,7 +150,7 @@ EOD;
   }
   
   /**
-   * Add 'via service_name' after commenter's name
+   * Adds 'via service_name' after commenter's name
    *
    * Filter Hook: 
    * <code>
@@ -172,7 +187,7 @@ EOD;
   }
   
   /**
-   * Add the social fields to the comment form
+   * Adds the social fields to the comment form
    */
   function commentForm_socialFields() {
     echo <<<EOD
@@ -183,10 +198,10 @@ EOD;
   }
 
   /**
-   * Add the 'comment via' radio buttons to the comment form
+   * Adds the 'comment via' radio buttons to the comment form
    */
   function commentForm_identities() {
-    $default_img = plugin_dir_url( __FILE__ ) . "includes/images/mystery-man.png";
+    $default_img = BSP_DIR_URL . "includes/images/mystery-man.png";
     echo <<<EOD
 <li class="comment-form-field" id="comment-form-identities">
   <label>Comment via</label>
@@ -228,11 +243,75 @@ EOD;
   function socialSharing( $permalink, $shortlink ) {
     echo <<<EOD
 <ul>
-  <li>{$this->_myFacebook->shareButton($permalink)}</li>
+  <li>{$this->_myFacebook->likeButton($permalink)}</li>
+  <li>{$this->_myFacebook->shareButton()}</li>
   <li>{$this->_myTwitter->shareButton($shortlink)}</li>
   <li>{$this->_myGooglePlus->shareButton($permalink)}</li>
 </ul>
 EOD;
+  }
+  
+  /**
+   * Retrieves meta tag containing Facebook app id for Open Graph Protocol
+   *
+   * Filter Hook:
+   * <code>
+   * return apply_filters( 'bsp_facebook_metatag', $metadata . "\n" );
+   * </code>
+   *
+   * @see Open_Graph_Protocol::getMetadata()
+   */
+  function addFacebookMetaTag( $metadata ) {
+   return $metadata . $this->_myFacebook->metaTag();
+  }
+   
+  /**
+   * Aggregates & displays images I've favorited across social sites
+   *
+   * @uses MyTumblr::getLikesCache()
+   * @uses MyDribbble::getLikesCache()
+   * @uses MyFlickr::getLikesCache()
+   * @uses Bubs_Social_Plugin::compareTimestamps()
+   */
+  function printLikes() {
+    $likes = array_merge( $this->_myTumblr->getLikesCache(), $this->_myDribbble->getLikesCache(), $this->_myFlickr->getLikesCache() );
+    usort( $likes, array($this, 'compareTimestamps') );
+    $likes = array_slice( $likes, 0, 5 );
+    foreach ( $likes as $like ) {
+      if ( $like['service'] == 'dribbble' ) {
+        $href = $like['url'];
+        if ( is_null($like['image']['cache_url']) ) {
+          $src = $like['image']['teaser_url'];
+        }
+        else {
+          $src = $like['image']['cache_url'];
+        }
+        $alt = "{$like['title']} by {$like['player']['name']} on Dribbble";
+      }
+      elseif ( $like['service'] == 'tumblr' ) {
+        $href = $like['post_url'];
+        $src = $like['photos'][0]['thumbnail']['url'];
+        $alt = "{$like['photos'][0]['caption']} by {$like['blog_name']} on Tumblr";
+      }
+      elseif ( $like['service'] == 'flickr' ) {
+        $href = $like['link'];
+        $src = $like['url_sq'];
+        $alt = "{$like['title']} by {$like['owner_name']} on Flickr";
+      }
+      echo '<li><a href="'. $href .'" title="'. $alt .'"><img src="'. $src .'" alt="'. $alt .'" /></a></li>' . "\n";
+    }
+    exit;
+  }
+  
+  /**
+   * Callback function to sort array by timestamps
+   */
+  function compareTimestamps( $a, $b ) {
+    if ( $a['timestamp'] == $b['timestamp'] ) {
+      return 0;
+    }
+    // want descending order
+    return ( $a['timestamp'] > $b['timestamp'] ) ? -1 : 1;
   }
 }
 

@@ -83,6 +83,9 @@
     function FacebookConnect() {
       var _this = this;
       FacebookConnect.__super__.constructor.call(this, 'facebook');
+      $(function() {
+        return _this.shareButton = $('#fb-share');
+      });
       window.fbAsyncInit = function() {
         FB.init({
           appId: window.fbAppId,
@@ -105,9 +108,20 @@
           e.preventDefault();
           return FB.login();
         });
-        return _this.logoutButton.bind('click', function(e) {
+        _this.logoutButton.bind('click', function(e) {
           e.preventDefault();
           return FB.logout();
+        });
+        return _this.shareButton.bind('click', function(e) {
+          e.preventDefault();
+          return FB.ui({
+            method: 'feed',
+            display: 'popup',
+            link: $(this).data('link'),
+            picture: $(this).data('picture'),
+            name: $(this).data('name'),
+            description: $(this).data('description')
+          });
         });
       };
     }

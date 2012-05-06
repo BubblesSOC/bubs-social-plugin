@@ -1,3 +1,4 @@
+# Compile from plugin dir: coffee -c includes/js/
 # Compile from current dir: coffee -c .
 $ = jQuery
 
@@ -58,6 +59,8 @@ class SocialConnect
 class FacebookConnect extends SocialConnect
   constructor: ->
     super 'facebook'
+    $ =>
+      @shareButton = $('#fb-share')
     window.fbAsyncInit = =>
       FB.init {
         appId : window.fbAppId  ## App ID
@@ -83,6 +86,15 @@ class FacebookConnect extends SocialConnect
       @logoutButton.bind 'click', (e) =>
         e.preventDefault()
         FB.logout()
+      @shareButton.bind 'click', (e) ->
+        e.preventDefault()
+        FB.ui
+          method: 'feed'
+          display: 'popup'
+          link: $(this).data('link')
+          picture: $(this).data('picture')
+          name: $(this).data('name')
+          description: $(this).data('description')
       
 class TwitterConnect extends SocialConnect
   constructor: ->
