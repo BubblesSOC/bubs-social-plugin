@@ -71,6 +71,7 @@ class MyDribbble extends MySocial {
     if ( preg_match( $pattern, $image_info['url'], $matches ) == 0 || count($matches) != 4 ) {
       return $image_info;
     }
+    $matches = array_map( 'strtolower', $matches );
     // $matches[1] = unique int identifier
     // $matches[2] = filename (w/extension)
     // $matches[3] = extension
@@ -82,7 +83,7 @@ class MyDribbble extends MySocial {
     }
     
     // Create local copy
-    switch ( strtolower($matches[3]) ) {
+    switch ( $matches[3] ) {
       case 'png':
         $im = imagecreatefrompng( $image_info['url'] );
         break;
@@ -127,7 +128,7 @@ class MyDribbble extends MySocial {
     $square = imagecreatetruecolor( 75, 75 );
     imagecopyresampled( $square, $thumb, 0, 0, $x, $y, 75, 75, 75, 75 );
     
-    switch ( strtolower($matches[3]) ) {
+    switch ( $matches[3] ) {
       case 'png':
         imagepng( $square, $abs_path );
         break;

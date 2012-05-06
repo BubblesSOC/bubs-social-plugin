@@ -2,5 +2,9 @@ includes/oauth_keys.php
 includes/classes/Goodreads.php
 includes/classes/Lastfm.php
 includes/classes/Pinterest.php
+includes/images/cache/*.jpg
+includes/images/cache/*.jpeg
+includes/images/cache/*.png
+includes/images/cache/*.gif
 includes/js/bsp-tumblr-admin.*
 old/*
