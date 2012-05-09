@@ -183,13 +183,11 @@
       return userInfoFields.disable();
     });
     return commentSubmit.click(function(e) {
-      e.preventDefault();
       if (!viaWpRadio.prop('checked')) {
         commentAuthor.input.val(userInfoFields.name.val());
         commentEmail.input.val('social@bubblessoc.net');
-        commentUrl.input.val(userInfoFields.profileLink.val());
+        return commentUrl.input.val(userInfoFields.profileLink.val());
       }
-      return commentForm.submit();
     });
   });
 

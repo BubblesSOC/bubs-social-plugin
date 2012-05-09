@@ -39,8 +39,8 @@ class Bubs_Social_Plugin {
   private $_myFlickr;
   private $_myGithub;
   private $_myGooglePlus;
-  // private $_myLastfm;
-  // private $_myPinterest;
+  private $_myLastfm;
+  private $_myPinterest;
   private $_myTumblr;
   private $_myTwitter;
   
@@ -262,7 +262,7 @@ EOD;
    * @see Open_Graph_Protocol::getMetadata()
    */
   function addFacebookMetaTag( $metadata ) {
-   return $metadata . $this->_myFacebook->metaTag();
+    return $metadata . $this->_myFacebook->metaTag();
   }
    
   /**

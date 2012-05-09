@@ -40,7 +40,7 @@ class MyTumblr extends MySocial_Oauth {
       'api_key' => TUMBLR_CONSUMER_KEY,
       'limit' => 5
     );
-    return $this->fetchItems( 'posts', 'parsePublishedPostsResponse', $this->apiUrl . 'blog/bubblessoc.tumblr.com/posts/photo?' . http_build_query($params) );
+    return $this->fetchItems( 'posts', 'parsePublishedPostsResponse', $this->apiUrl . 'blog/bubblessoc.tumblr.com/posts?' . http_build_query($params) );
   }
   
   function parsePublishedPostsResponse( $response ) {

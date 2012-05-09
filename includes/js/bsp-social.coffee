@@ -135,9 +135,7 @@ $ ->
     window.wpComments.showCommenterInfo()
     userInfoFields.disable()
   commentSubmit.click (e) ->
-    e.preventDefault()
     if !viaWpRadio.prop('checked')
       commentAuthor.input.val userInfoFields.name.val()
       commentEmail.input.val 'social@bubblessoc.net'
       commentUrl.input.val userInfoFields.profileLink.val()
-    commentForm.submit()

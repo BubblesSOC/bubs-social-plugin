@@ -32,7 +32,7 @@ class MyGithub extends MySocial {
   
   private function _getPublicRepos() {
     // Ref: http://developer.github.com/v3/repos/
-    return $this->fetchItems( 'public_repos', 'parsePublicReposResponse', $this->apiUrl . 'users/bubblessoc/repos', 60*60 );
+    return $this->fetchItems( 'public_repos', 'parsePublicReposResponse', $this->apiUrl . 'users/bubblessoc/repos', 60*60, array('sslverify' => false) );
   }
   
   function parsePublicReposResponse( $response ) {

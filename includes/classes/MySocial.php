@@ -88,12 +88,12 @@ abstract class MySocial {
    *
    * @return WP_Error|array
    */
-  protected function requestResource( $resource_url, $method = 'get' ) {
+  protected function requestResource( $resource_url, $method = 'get', $args = array() ) {
     $method = strtolower($method);
     if ( $method == 'post' )
-      $response = wp_remote_post( $resource_url );
+      $response = wp_remote_post( $resource_url, $args );
     else
-      $response = wp_remote_get( $resource_url );
+      $response = wp_remote_get( $resource_url, $args );
 
     if ( is_wp_error($response) )
       return $response;
@@ -148,12 +148,12 @@ abstract class MySocial {
    *
    * @return WP_Error|bool Returns TRUE if no errors occurred
    */
-  protected function fetchItems( $key, $parse_method, $resource_url, $fetch_interval = 60 ) {
+  protected function fetchItems( $key, $parse_method, $resource_url, $fetch_interval = 60, $args = array() ) {
     $time_diff = time() - $this->cache[$key]['timestamp'];
     
     if ( $time_diff > $fetch_interval ) {
       // Fetch from Service
-      $response = $this->requestResource( $resource_url );
+      $response = $this->requestResource( $resource_url, $args );
       
       if ( is_wp_error($response) )
         return $response;
