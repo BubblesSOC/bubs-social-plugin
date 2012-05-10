@@ -37,7 +37,7 @@ abstract class MySocial {
    * @param array $keys Array containing the names of the sub-caches (i.e. indices)
    */
   protected function initCache( $keys ) {
-    $default_cache = array_fill_keys( $keys, array('timestamp' => 0, 'items' => array(), 'rate_limit' => 0, 'rate_limit_remaining' => 0) );
+    $default_cache = array_fill_keys( $keys, array('timestamp' => 0, 'items' => array()) );
     $this->cache = get_option( $this->cacheOptionName, $default_cache );
     
     // In case get_option() fails to return an array
@@ -100,10 +100,6 @@ abstract class MySocial {
       $response = wp_remote_post( $resource_url, $args );
     else
       $response = wp_remote_get( $resource_url, $args );
-
-    echo '<pre>';
-    print_r($response);
-    echo '</pre>';
 
     if ( is_wp_error($response) )
       return $response;
@@ -176,7 +172,10 @@ abstract class MySocial {
   }
   
   /**
+   * Escape miscellaneous unicode characters not handled by WordPress
    *
+   * @param  string $str
+   * @return string
    */
   protected function convertChars( $str ) {
     $new_str = '';

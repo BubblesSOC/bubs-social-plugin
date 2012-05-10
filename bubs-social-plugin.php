@@ -275,7 +275,7 @@ EOD;
    */
   function printLikes() {
     $likes = array_merge( $this->_myTumblr->getLikesCache(), $this->_myDribbble->getLikesCache(), $this->_myFlickr->getLikesCache() );
-    usort( $likes, array($this, 'compareTimestamps') );
+    usort( $likes, array('Bubs_Social_Plugin', 'compareTimestamps') );
     $likes = array_slice( $likes, 0, 5 );
     foreach ( $likes as $like ) {
       if ( $like['service'] == 'dribbble' ) {
@@ -306,7 +306,7 @@ EOD;
   /**
    * Callback function to sort array by timestamps
    */
-  function compareTimestamps( $a, $b ) {
+  static function compareTimestamps( $a, $b ) {
     if ( $a['timestamp'] == $b['timestamp'] ) {
       return 0;
     }

@@ -37,22 +37,22 @@ class MyGithub extends MySocial {
   }
   
   function parsePublicReposResponse( $response ) {
-    $repos = array_reverse($response);
     $items = array();
-    for ( $i=0; $i<3; $i++ ) {
+    foreach ( $response as $repo ) {
       $item = array(
-        'url' => $repos[$i]->html_url,
-        'git_url' => $repos[$i]->git_url,
-        'clone_url' => $repos[$i]->clone_url,
-        'created_at' => $repos[$i]->created_at,
-        'updated_at' => $repos[$i]->updated_at,
-        'updated_timestamp' => strtotime( $repos[$i]->updated_at ),
-        'name' => $repos[$i]->name,
-        'description' => $repos[$i]->description
+        'url' => $repo->html_url,
+        'git_url' => $repo->git_url,
+        'clone_url' => $repo->clone_url,
+        'created_at' => $repo->created_at,
+        'updated_at' => $repo->updated_at,
+        'timestamp' => strtotime( $repo->updated_at ),
+        'name' => $repo->name,
+        'description' => $repo->description
       );
       array_push($items, $item);
     }
-    return $items;
+    usort( $items, array('Bubs_Social_Plugin', 'compareTimestamps') );
+    return array_slice( $items, 0, 5 );
   }
 }
 ?>
