@@ -13,7 +13,8 @@ class MyFlickr extends MySocial {
     $this->hookAjax('bsp-print-photos', 'printPublicPhotos');
   }
 
-  protected function checkServiceError( $response_code, $response_body ) {
+  protected function checkServiceError( $response ) {
+    $response_body = json_decode( $response['body'] );
     if ( $response_body->stat != 'ok' ) {
       return new WP_Error( 'service_error', $response_body->message );
     }

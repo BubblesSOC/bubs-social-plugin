@@ -37,8 +37,13 @@ abstract class MySocial {
    * @param array $keys Array containing the names of the sub-caches (i.e. indices)
    */
   protected function initCache( $keys ) {
-    $default_cache = array_fill_keys( $keys, array('timestamp' => 0, 'items' => array()) );
+    $default_cache = array_fill_keys( $keys, array('timestamp' => 0, 'items' => array(), 'rate_limit' => 0, 'rate_limit_remaining' => 0) );
     $this->cache = get_option( $this->cacheOptionName, $default_cache );
+    
+    // In case get_option() fails to return an array
+    if ( !is_array($this->cache) ) {
+      $this->cache = $default_cache;
+    }
     
     // Additional keys can be added after the WordPress option is created
     // The additional keys (with default vals) should be added to the cache array
@@ -85,6 +90,7 @@ abstract class MySocial {
    *
    * @param string $resource_url
    * @param string $method get|post
+   * @param array  $args additional arguments for the WordPress HTTP functions
    *
    * @return WP_Error|array
    */
@@ -95,21 +101,23 @@ abstract class MySocial {
     else
       $response = wp_remote_get( $resource_url, $args );
 
+    echo '<pre>';
+    print_r($response);
+    echo '</pre>';
+
     if ( is_wp_error($response) )
       return $response;
       
-    return $this->checkServiceError( $response['response']['code'], json_decode($response['body']) );
+    return $this->checkServiceError( $response );
   }
   
   /**
-   * Uses the response code and decoded JSON to report any service-specific errors
+   * Uses the response to report any service-specific errors
    *
-   * @param string $response_code
-   * @param array $response_body Decoded JSON
-   *
+   * @param array $response
    * @return WP_Error|array
    */
-  abstract protected function checkServiceError( $response_code, $response_body );
+  abstract protected function checkServiceError( $response );
   
   /**
    * Prints a HTML comment containing the status of the last fetch (for debugging)
@@ -145,15 +153,17 @@ abstract class MySocial {
    * @param string $parse_method Name of the method that parses the response
    * @param string $resource_url
    * @param int    $fetch_interval Number of seconds between each fetch
+   * @param string $method get|post
+   * @param array  $args Additional arguments for the WordPress HTTP functions
    *
    * @return WP_Error|bool Returns TRUE if no errors occurred
    */
-  protected function fetchItems( $key, $parse_method, $resource_url, $fetch_interval = 60, $args = array() ) {
+  protected function fetchItems( $key, $parse_method, $resource_url, $fetch_interval = 60, $method = 'get', $args = array() ) {
     $time_diff = time() - $this->cache[$key]['timestamp'];
     
     if ( $time_diff > $fetch_interval ) {
       // Fetch from Service
-      $response = $this->requestResource( $resource_url, $args );
+      $response = $this->requestResource( $resource_url, $method, $args );
       
       if ( is_wp_error($response) )
         return $response;
@@ -163,6 +173,56 @@ abstract class MySocial {
     }
     // Else: Use Cache
     return true;
+  }
+  
+  /**
+   *
+   */
+  protected function convertChars( $str ) {
+    $new_str = '';
+    $strlen = strlen($str);
+    for ( $i=0; $i<$strlen; $i++ ) {
+      $chars_left = $strlen - $i - 1;
+      if ( $chars_left >= 2 && ord($str[$i]) == hexdec('e2') ) {
+        $byte2 = $str[$i+1];
+        $byte3 = $str[$i+2];
+        if ( ord($byte2) == hexdec('97') ) {
+          // Geometric Shapes
+          if ( ord($byte3) == hexdec('a0') ) {
+            // Upper Half Circle
+            $new_str .= '&#9696;';
+          }
+          elseif ( ord($byte3) == hexdec('a1') ) {
+            // Lower Half Circle
+            $new_str .= '&#9697;';
+          }
+          elseif ( ord($byte3) == hexdec('95') ) {
+            // CIRCLE WITH ALL BUT UPPER LEFT QUADRANT BLACK
+            $new_str .= '&#9685;';
+          }
+          elseif ( ord($byte3) == hexdec('8f') ) {
+            // Black Circle
+            $new_str .= '&#9679;';
+          }
+        }
+        elseif ( ord($byte2) == hexdec('99') ) {
+          // Miscellaneous Symbols
+          if ( ord($byte3) == hexdec('a1') ) {
+            // White Heart Suit
+            $new_str .= '&#9825;';
+          }
+          elseif ( ord($byte3) == hexdec('ab') ) {
+            // Beamed Eighth Notes
+            $new_str .= '&#9835;';
+          }
+        }
+        $i+=2;
+      }
+      else {
+        $new_str .= $str[$i];
+      }
+    }
+    return $new_str;
   }
 }
 

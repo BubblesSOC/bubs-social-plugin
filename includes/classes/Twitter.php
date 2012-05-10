@@ -30,7 +30,8 @@ class MyTwitter extends MySocial_Oauth {
     add_action( 'wp_ajax_bsp-tweet-post', array($this, 'tweetPostManually') );
   }
   
-  protected function checkServiceError( $response_code, $response_body ) {
+  protected function checkServiceError( $response ) {
+    $response_body = json_decode( $response['body'] );
     if ( isset($response_body->error) ) {
       return new WP_Error( 'service_error', $response_body->error );
     }
@@ -307,7 +308,7 @@ EOD;
         'id' => $tweet->id_str,
         'in_reply_to_status_id' => $tweet->in_reply_to_status_id_str,
         'in_reply_to_screen_name' => $tweet->in_reply_to_screen_name,
-        'text' => $tweet->text,
+        'text' => $this->convertChars( $tweet->text ),
         'created_at' => $tweet->created_at
       );
       if ( isset($tweet->retweeted_status) ) {

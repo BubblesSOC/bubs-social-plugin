@@ -18,7 +18,8 @@ class MyTumblr extends MySocial_Oauth {
     $this->initCache( array('likes') );
   }
   
-  protected function checkServiceError( $response_code, $response_body ) {
+  protected function checkServiceError( $response ) {
+    $response_body = json_decode( $response['body'] );
     if ( $response_body->meta->status != 200 ) {
       return new WP_Error( 'service_error', $response_body->meta->msg );
     }

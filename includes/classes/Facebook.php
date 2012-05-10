@@ -8,8 +8,8 @@
 class MyFacebook extends MySocial_Oauth {
   function __construct() {}
  
-  protected function checkServiceError( $response_code, $response_body ) {
-    return $response_body;
+  protected function checkServiceError( $response ) {
+    return json_decode( $response['body'] );
   }
   
   function embeddedJS() {
