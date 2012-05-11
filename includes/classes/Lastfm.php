@@ -14,7 +14,8 @@ class MyLastFM extends MySocial {
     $this->hookAjax('bsp-print-tracks', 'printRecentTracks');
   }
 
-  protected function checkServiceError( $response_code, $response_body ) {
+  protected function checkServiceError( $response ) {
+    $response_body = json_decode( $response['body'] );
     if ( isset($response_body->error) ) {
       return new WP_Error( 'service_error', $response_body->message );
     }
@@ -38,7 +39,7 @@ class MyLastFM extends MySocial {
       'user'    => 'bubblessoc',
       'limit'   => 5
     );
-    return $this->fetchItems( 'recent_tracks', 'parseRecentTracksResponse', $this->apiUrl . '&' . http_build_query($params) );
+    return $this->fetchItems( 'recent_tracks', 'parseRecentTracksResponse', $this->apiUrl . '&' . http_build_query($params), 60*60 );
   }
   
   function parseRecentTracksResponse( $response ) {

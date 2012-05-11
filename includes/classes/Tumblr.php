@@ -78,7 +78,7 @@ class MyTumblr extends MySocial_Oauth {
           'post_url' => $post->post_url,
           'type' => $post->type,
           'date' => $post->date,
-          'timestamp' => $post->timestamp,
+          'timestamp' => time(),
           'photos' => array()
         );
         // Parse Photos
@@ -98,7 +98,12 @@ class MyTumblr extends MySocial_Oauth {
         if ( isset($post->photoset_layout) ) {
           $item['photoset_layout'] = $post->photoset_layout;
         }
-        array_push($items, $item);
+        // Check if item is already cached
+        $id = (string) $post->id;
+        if ( array_key_exists($id, $this->cache['likes']['items']) ) {
+          $item['timestamp'] = $this->cache['likes']['items'][$id]['timestamp'];
+        }
+        $items[$id] = $item;
       }
     }
     return $items;

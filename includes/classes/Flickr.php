@@ -35,7 +35,7 @@ class MyFlickr extends MySocial {
     // Ref: http://www.flickr.com/services/api/flickr.people.getPublicPhotos.html
     $params = array(
       'method'   => 'flickr.people.getPublicPhotos',
-      'user_id'  => '13761781@N00',
+      'user_id'  => FLICKR_USER_ID,
       'extras'   => 'date_upload,url_sq',
       'per_page' => 5
     );
@@ -65,7 +65,7 @@ class MyFlickr extends MySocial {
     // Ref: http://www.flickr.com/services/api/flickr.favorites.getPublicList.html
     $params = array(
       'method'   => 'flickr.favorites.getPublicList',
-      'user_id'  => '13761781@N00',
+      'user_id'  => FLICKR_USER_ID,
       'extras'   => 'owner_name,url_sq',
       'per_page' => 5
     );

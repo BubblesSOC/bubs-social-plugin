@@ -45,13 +45,18 @@ class MyDribbble extends MySocial {
         'image' => $image,
         'title' => $shot->title,
         'created_at' => $shot->created_at,
-        'timestamp' => strtotime($shot->created_at),
+        'timestamp' => time(),
         'player' => array(
           'name' => $shot->player->name,
           'username' => $shot->player->username
         )
       );
-      array_push($items, $item);
+      // Check if item is already cached
+      $id = (string) $shot->id;
+      if ( array_key_exists($id, $this->cache['likes']['items']) ) {
+        $item['timestamp'] = $this->cache['likes']['items'][$id]['timestamp'];
+      }
+      $items[$id] = $item;
     }
     return $items;
   }
