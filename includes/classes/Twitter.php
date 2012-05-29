@@ -7,6 +7,7 @@
  */
 class MyTwitter extends MySocial_Oauth {
   function __construct() {
+    $this->service = 'Twitter';
     $this->apiUrl = "http://api.twitter.com/1/";
     $this->signatures = array(
       'consumer_key'  => TWITTER_CONSUMER_KEY,

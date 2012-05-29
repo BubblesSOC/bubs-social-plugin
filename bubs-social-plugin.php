@@ -55,10 +55,15 @@ class Bubs_Social_Plugin {
     $this->_myTumblr = new MyTumblr();
     $this->_myTwitter = new MyTwitter();
     
-    add_action('admin_enqueue_scripts', array($this, 'adminJS'));
-    add_action('admin_print_styles', array($this, 'adminCSS'));
+    // Admin & Social JS
     add_action('wp_enqueue_scripts', array($this, 'socialJS'));
     add_action('wp_footer', array($this, 'embeddedJS'));
+    add_action('admin_enqueue_scripts', array($this, 'adminIncludes'));
+    
+    // Admin Settings/Options Page
+    add_action('admin_init', array($this, 'initSettingsPage'));
+    add_action('admin_menu', array($this, 'addSettingsPage'));
+    add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'actionLinks'));
 
     // Comment via Social
     add_filter('wp_get_current_commenter', array($this, 'social_getCurrentCommenter'));
@@ -99,16 +104,54 @@ EOD;
    *
    * @global string $pagenow
    */
-  function adminJS() {
+  function adminIncludes() {
     global $pagenow;
-    if ( $pagenow == 'post.php' || $pagenow == 'post-new.php' )
+    if ( $pagenow == 'post.php' || $pagenow == 'post-new.php' ) {
       wp_enqueue_script('bsp_admin_js', plugins_url('/includes/js/bsp-admin.js', __FILE__), array('jquery'));
-  }
-
-  function adminCSS() {
-    global $pagenow;
-    if ( $pagenow == 'post.php' || $pagenow == 'post-new.php' )
       wp_enqueue_style('bsp_admin_css', plugins_url('/includes/bsp-admin.css', __FILE__));
+    }
+  }
+  
+  /**
+   * Admin Settings/Options Page
+   */
+  function initSettingsPage() {
+    $this->_myDribbble->initSettingsPage();
+    $this->_myFlickr->initSettingsPage();
+    $this->_myGithub->initSettingsPage();
+    $this->_myTumblr->initSettingsPage();
+    $this->_myTwitter->initSettingsPage();
+  }
+  
+  function addSettingsPage() {
+    add_options_page("Bubs' Social Plugin", "Bubs' Social Plugin", 'manage_options', BSP_PLUGIN_SLUG, array($this, 'settingsPage'));
+  }
+  
+  function settingsPage() {
+    if ( !current_user_can('manage_options') )  {
+  		wp_die( __('You do not have sufficient permissions to access this page.') );
+  	}
+?>
+<div class="wrap">
+  <div id="icon-options-general" class="icon32"><br></div>
+	<h2>Bubs' Social Plugin Settings</h2>
+	<form action="options.php" method="post">
+<?php
+settings_fields('bsp_reset_cache');
+do_settings_sections(BSP_PLUGIN_SLUG);
+submit_button('Reset Cache');
+?>
+  </form>
+</div>
+<?php
+  }
+  
+  /**
+   * Add link to BSP Settings page under "Installed Plugins"
+   */
+  function actionLinks( $actions ) {
+    $actions[] = '<a href="options-general.php?page='. BSP_PLUGIN_SLUG .'">Settings</a>';
+    return $actions;
   }
   
   /**

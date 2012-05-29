@@ -7,6 +7,7 @@
  */
 class MyTumblr extends MySocial_Oauth {
   function __construct() {
+    $this->service = 'Tumblr';
     $this->apiUrl = "http://api.tumblr.com/v2/";
     $this->signatures = array(
       'consumer_key'  => TUMBLR_CONSUMER_KEY,
@@ -73,7 +74,7 @@ class MyTumblr extends MySocial_Oauth {
       // Only want photo likes
       if ( $post->type == 'photo' ) {
         $item = array(
-          'service' => 'tumblr',
+          'service' => strtolower($this->service),
           'blog_name' => $post->blog_name,
           'post_url' => $post->post_url,
           'type' => $post->type,

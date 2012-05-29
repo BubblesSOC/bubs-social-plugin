@@ -8,6 +8,7 @@
 
 class MyLastFM extends MySocial {
   function __construct() {
+    $this->service = 'Last.fm';
     $this->apiUrl = 'http://ws.audioscrobbler.com/2.0/?api_key=' . LASTFM_API_KEY;
     $this->cacheOptionName = 'lfm_cache';
     $this->initCache( array('recent_tracks') );

@@ -8,6 +8,7 @@
 
 class MyGithub extends MySocial {
   function __construct() {
+    $this->service = 'Github';
     $this->apiUrl = "https://api.github.com/";
     $this->cacheOptionName = 'github_cache';
     $this->initCache( array('public_repos') );

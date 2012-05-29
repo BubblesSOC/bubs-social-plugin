@@ -7,6 +7,7 @@
  */
 class MyFlickr extends MySocial {
   function __construct() {
+    $this->service = 'Flickr';
     $this->apiUrl = "http://api.flickr.com/services/rest/?api_key=" . FLICKR_API_KEY . "&format=json&nojsoncallback=1";
     $this->cacheOptionName = 'flickr_cache';
     $this->initCache( array('public_photos', 'favorites') );
@@ -92,7 +93,7 @@ class MyFlickr extends MySocial {
       //   $photosurl = $user_info->person->photosurl->_content;
       // }
       $item = array(
-        'service' => 'flickr',
+        'service' => strtolower($this->service),
         'id' => $photo->id,
         'owner_id' => $photo->owner,
         'owner_name' => $photo->ownername,

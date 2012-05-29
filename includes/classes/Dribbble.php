@@ -7,6 +7,7 @@
  */
 class MyDribbble extends MySocial {
   function __construct() {
+    $this->service = 'Dribbble';
     $this->apiUrl = "http://api.dribbble.com/";
     $this->cacheOptionName = 'dribbble_cache';
     $this->initCache( array('likes') );
@@ -40,7 +41,7 @@ class MyDribbble extends MySocial {
         'cache_url' => null
       ));
       $item = array(
-        'service' => 'dribbble',
+        'service' => strtolower($this->service),
         'url' => $shot->url,
         'image' => $image,
         'title' => $shot->title,
