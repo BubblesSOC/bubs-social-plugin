@@ -92,10 +92,10 @@ abstract class MySocial {
     $section_id = 'bsp-reset-' . strtolower($this->service) . '-cache';
     add_settings_section( $section_id, ucfirst($this->service), array($this, 'settingsSectionContent'), BSP_PLUGIN_SLUG );
     foreach ( $this->cache as $key => $cache ) {
-      $field_id = $this->cacheOptionName . '_' . $key;
+      $field_id = $this->cacheOptionName . '-' . $key;
       add_settings_field( $field_id, 'Reset <code>' . $key . '</code> Cache?', array($this, 'settingsField'), BSP_PLUGIN_SLUG, $section_id, array( 'key' => $key, 'timestamp' => $cache['timestamp'], 'id' => $field_id ) );
     }
-    register_setting( 'bsp_reset_cache', $this->cacheOptionName, array($this, 'settingsSanitize') );
+    register_setting( 'bsp_reset_cache', $this->cacheOptionName, array($this, 'settingsResetCache') );
   }
   
   function settingsSectionContent() {}
@@ -105,7 +105,7 @@ abstract class MySocial {
     echo '<span class="description">Last Cached: ' . ($args['timestamp'] == 0 ? 'Never' : date( get_option('date_format') . ' ' . get_option('time_format'), $args['timestamp'] )) . '</span>' . "\n";
   }
   
-  function settingsSanitize( $values ) {
+  function settingsResetCache( $values ) {
     if ( isset($_POST) && isset($_POST['option_page']) && $_POST['option_page'] == 'bsp_reset_cache' && is_array($values) ) {
       foreach ( $values as $key => $val ) {
         if ( isset($this->cache[$key]) )
