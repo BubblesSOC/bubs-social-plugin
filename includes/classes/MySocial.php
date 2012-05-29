@@ -86,7 +86,11 @@ abstract class MySocial {
   }
   
   /**
-   * Settings Page
+   * Initializes the WordPress Settings Page section for the cache
+   *
+   * @uses MySocial::settingsSectionContent()
+   * @uses MySocial::settingsField()
+   * @uses MySocial::settingsResetCache()
    */
   function initSettingsPage() {
     $section_id = 'bsp-reset-' . strtolower($this->service) . '-cache';
@@ -98,16 +102,34 @@ abstract class MySocial {
     register_setting( 'bsp_reset_cache', $this->cacheOptionName, array($this, 'settingsResetCache') );
   }
   
+  /**
+   * Additional content to display in the WordPress Settings Page section
+   */
   function settingsSectionContent() {}
     
+  /**
+   * Displays the checkbox corresponding to a subcache on the WordPress Settings Page
+   *
+   * @param array $args Set via add_settings_field() in MySocial::initSettingsPage()
+   */
   function settingsField( $args ) {
     echo '<input type="checkbox" id="' . $args['id'] . '" name="' . $this->cacheOptionName . '[' . $args['key'] . ']" value="true" />' . "\n";
     echo '<span class="description">Last Cached: ' . ($args['timestamp'] == 0 ? 'Never' : date( get_option('date_format') . ' ' . get_option('time_format'), $args['timestamp'] )) . '</span>' . "\n";
   }
   
+  /**
+   * Resets the subcache(s)
+   *
+   * Sanitize callback called before updating the WordPress option containing the cache.
+   * If called via the WordPress Settings Page then the subcache(s) specified in $values will be reset.
+   *
+   * @param mixed $values
+   */
   function settingsResetCache( $values ) {
-    if ( isset($_POST) && isset($_POST['option_page']) && $_POST['option_page'] == 'bsp_reset_cache' && is_array($values) ) {
+    if ( is_admin() && isset($_POST) && isset($_POST['option_page']) && $_POST['option_page'] == 'bsp_reset_cache' && is_array($values) ) {
       foreach ( $values as $key => $val ) {
+        // Here $values corresponds to the checked checkboxes
+        // $key = subcache, $val = "true"
         if ( isset($this->cache[$key]) )
           $this->cache[$key] = array( 'timestamp' => 0, 'items' => array() );
       }
