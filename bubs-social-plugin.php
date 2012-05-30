@@ -44,6 +44,8 @@ class Bubs_Social_Plugin {
   private $_myTumblr;
   private $_myTwitter;
   
+  public static $optionGroupName = 'bsp_reset_cache';
+  
   function __construct() {
     $this->_myDribbble = new MyDribbble();
     $this->_myFacebook = new MyFacebook();
@@ -137,7 +139,7 @@ EOD;
 	<h2>Bubs' Social Plugin Settings</h2>
 	<form action="options.php" method="post">
 <?php
-settings_fields('bsp_reset_cache');
+settings_fields( Bubs_Social_Plugin::$optionGroupName );
 do_settings_sections(BSP_PLUGIN_SLUG);
 submit_button('Reset Cache');
 ?>

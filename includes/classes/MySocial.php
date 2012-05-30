@@ -91,6 +91,7 @@ abstract class MySocial {
    * @uses MySocial::settingsSectionContent()
    * @uses MySocial::settingsField()
    * @uses MySocial::settingsResetCache()
+   * @uses Bubs_Social_Plugin::$optionGroupName
    */
   function initSettingsPage() {
     $section_id = 'bsp-reset-' . strtolower($this->service) . '-cache';
@@ -99,7 +100,7 @@ abstract class MySocial {
       $field_id = $this->cacheOptionName . '-' . $key;
       add_settings_field( $field_id, 'Reset <code>' . $key . '</code> Cache?', array($this, 'settingsField'), BSP_PLUGIN_SLUG, $section_id, array( 'key' => $key, 'timestamp' => $cache['timestamp'], 'id' => $field_id ) );
     }
-    register_setting( 'bsp_reset_cache', $this->cacheOptionName, array($this, 'settingsResetCache') );
+    register_setting( Bubs_Social_Plugin::$optionGroupName, $this->cacheOptionName, array($this, 'settingsResetCache') );
   }
   
   /**
@@ -123,10 +124,11 @@ abstract class MySocial {
    * Sanitize callback called before updating the WordPress option containing the cache.
    * If called via the WordPress Settings Page then the subcache(s) specified in $values will be reset.
    *
+   * @uses Bubs_Social_Plugin::$optionGroupName
    * @param mixed $values
    */
   function settingsResetCache( $values ) {
-    if ( is_admin() && isset($_POST) && isset($_POST['option_page']) && $_POST['option_page'] == 'bsp_reset_cache' && is_array($values) ) {
+    if ( is_admin() && isset($_POST) && isset($_POST['option_page']) && $_POST['option_page'] == Bubs_Social_Plugin::$optionGroupName && is_array($values) ) {
       foreach ( $values as $key => $val ) {
         // Here $values corresponds to the checked checkboxes
         // $key = subcache, $val = "true"
