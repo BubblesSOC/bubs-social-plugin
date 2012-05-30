@@ -63,7 +63,7 @@ class Bubs_Social_Plugin {
     // Admin Settings/Options Page
     add_action('admin_init', array($this, 'initSettingsPage'));
     add_action('admin_menu', array($this, 'addSettingsPage'));
-    add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'actionLinks'));
+    add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'linkSettingsPage'));
 
     // Comment via Social
     add_filter('wp_get_current_commenter', array($this, 'social_getCurrentCommenter'));
@@ -149,7 +149,7 @@ submit_button('Reset Cache');
   /**
    * Add link to BSP Settings page under "Installed Plugins"
    */
-  function actionLinks( $actions ) {
+  function linkSettingsPage( $actions ) {
     $actions[] = '<a href="options-general.php?page='. BSP_PLUGIN_SLUG .'">Settings</a>';
     return $actions;
   }
