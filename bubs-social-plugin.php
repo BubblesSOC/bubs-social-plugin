@@ -44,6 +44,7 @@ class Bubs_Social_Plugin {
   private $_myTumblr;
   private $_myTwitter;
   
+  private $_settingsPageHook;
   public static $optionGroupName = 'bsp_reset_cache';
   
   function __construct() {
@@ -102,15 +103,19 @@ EOD;
   }
   
   /**
-   * Only include admin CSS and JS on admin post pages
+   * Only include admin CSS and JS on admin post pages. Only include settings JS on settings page
    *
    * @global string $pagenow
+   * @param  string $hook_suffix
    */
-  function adminIncludes() {
+  function adminIncludes( $hook_suffix ) {
     global $pagenow;
     if ( $pagenow == 'post.php' || $pagenow == 'post-new.php' ) {
       wp_enqueue_script('bsp_admin_js', plugins_url('/includes/js/bsp-admin.js', __FILE__), array('jquery'));
       wp_enqueue_style('bsp_admin_css', plugins_url('/includes/bsp-admin.css', __FILE__));
+    }
+    elseif ( $hook_suffix == $this->_settingsPageHook ) {
+      wp_enqueue_script('bsp_settings_js', plugins_url('/includes/js/bsp-settings.js', __FILE__), array('jquery'));
     }
   }
   
@@ -126,7 +131,7 @@ EOD;
   }
   
   function addSettingsPage() {
-    add_options_page("Bubs' Social Plugin", "Bubs' Social Plugin", 'manage_options', BSP_PLUGIN_SLUG, array($this, 'settingsPage'));
+    $this->_settingsPageHook = add_options_page("Bubs' Social Plugin", "Bubs' Social Plugin", 'manage_options', BSP_PLUGIN_SLUG, array($this, 'settingsPage'));
   }
   
   function settingsPage() {
@@ -137,7 +142,11 @@ EOD;
 <div class="wrap">
   <div id="icon-options-general" class="icon32"><br></div>
 	<h2>Bubs' Social Plugin Settings</h2>
-	<form action="options.php" method="post">
+	<p>
+	  <input type="checkbox" id="bsp-invert-checkboxes" />
+	  <label for="bsp-invert-checkboxes">Toggle All Checkboxes</label>
+	</p>
+	<form action="options.php" method="post" id="bsp-settings-form">
 <?php
 settings_fields( Bubs_Social_Plugin::$optionGroupName );
 do_settings_sections(BSP_PLUGIN_SLUG);
