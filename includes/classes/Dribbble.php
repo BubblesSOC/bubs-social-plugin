@@ -6,11 +6,16 @@
  * @since 1.0
  */
 class MyDribbble extends MySocial {
+  private $_cacheDirPath;
+  private $_cacheDirUrl;
+  
   function __construct() {
     $this->service = 'Dribbble';
     $this->apiUrl = "http://api.dribbble.com/";
     $this->cacheOptionName = 'dribbble_cache';
     $this->initCache( array('likes') );
+    $this->_cacheDirPath = BSP_DIR_PATH . "includes/images/cache/dribbble/";
+    $this->_cacheDirUrl  = BSP_DIR_URL  . "includes/images/cache/dribbble/";
   }
 
   protected function checkServiceError( $response ) {
@@ -82,8 +87,8 @@ class MyDribbble extends MySocial {
     $matches = array_map( 'strtolower', $matches );
     // $matches[1] = filename (w/extension)
     // $matches[2] = extension
-    $abs_path = BSP_DIR_PATH . "includes/images/cache/dribbble/{$image_info['id']}-{$matches[1]}";
-    $rel_path = BSP_DIR_URL  . "includes/images/cache/dribbble/{$image_info['id']}-{$matches[1]}";
+    $abs_path = "{$this->_cacheDirPath}{$image_info['id']}-{$matches[1]}";
+    $rel_path = "{$this->_cacheDirUrl}{$image_info['id']}-{$matches[1]}";
     if ( file_exists($abs_path) ) {
       $image_info['cache_url'] = $rel_path;
       return $image_info;
@@ -155,13 +160,14 @@ class MyDribbble extends MySocial {
   }
   
   /**
-   * Deletes any thumbnails from the Dribbble cache folder 
+   * Deletes any thumbnails from the Dribbble cache folder
+   *
+   * @see MySocial::settingsResetCache()
    */
-  function emptyCacheFolder() {
-    $dir = BSP_DIR_PATH . "includes/images/cache/dribbble/";
-    if ( is_dir($dir) && $dh = opendir($dir) ) {
+  protected function emptyCacheFolder() {
+    if ( is_dir($this->_cacheDirPath) && $dh = opendir($this->_cacheDirPath) ) {
       while ( ($file = readdir($dh)) !== false ) {
-        $abs_path = $dir . $file;
+        $abs_path = $this->_cacheDirPath . $file;
         $pattern = '/^[^\.]+\.(png|jpg|jpeg|gif)$/i';
         if ( is_file($abs_path) && preg_match($pattern, $file) == 1 && getimagesize($abs_path) )
           unlink($abs_path);

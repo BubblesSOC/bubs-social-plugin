@@ -106,7 +106,13 @@ abstract class MySocial {
   /**
    * Additional content to display in the WordPress Settings Page section
    */
-  function settingsSectionContent() {}
+  function settingsSectionContent() {
+    if ( strtolower($this->service) == 'dribbble' ) {
+      echo '<pre>';
+      print_r($this->cache['likes']);
+      echo '</pre>';
+    }
+  }
     
   /**
    * Displays the checkbox or radio buttons corresponding to a subcache on the WordPress Settings Page
