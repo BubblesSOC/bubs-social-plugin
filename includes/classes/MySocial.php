@@ -109,12 +109,23 @@ abstract class MySocial {
   function settingsSectionContent() {}
     
   /**
-   * Displays the checkbox corresponding to a subcache on the WordPress Settings Page
+   * Displays the checkbox or radio buttons corresponding to a subcache on the WordPress Settings Page
    *
    * @param array $args Set via add_settings_field() in MySocial::initSettingsPage()
    */
   function settingsField( $args ) {
-    echo '<input type="checkbox" id="' . $args['id'] . '" name="' . $this->cacheOptionName . '[' . $args['key'] . ']" value="true" />' . "\n";
+    if ( strtolower($this->service) == 'dribbble' && strtolower($args['key']) == 'likes' ) {
+      // 75x75px Dribbble thumbnails are created & stored locally
+      echo '<input type="radio" id="' . $args['id'] . '-delete" name="' . $this->cacheOptionName . '[likes]" value="delete" />' . "\n";
+      echo '<label for="' . $args['id'] . '-delete">And also delete cached thumbnails</label><br />' . "\n";
+      echo '<input type="radio" id="' . $args['id'] . '-no_delete" name="' . $this->cacheOptionName . '[likes]" value="no_delete" />' . "\n";
+      echo '<label for="' . $args['id'] . '-no_delete">But do not delete cached thumbnails</label><br />' . "\n";
+      echo '<input type="radio" id="' . $args['id'] . '-do_nothing" name="' . $this->cacheOptionName . '[likes]" value="do_nothing" />' . "\n";
+      echo '<label for="' . $args['id'] . '-do_nothing">Do not reset cache</label><br />' . "\n";
+    }
+    else {
+      echo '<input type="checkbox" id="' . $args['id'] . '" name="' . $this->cacheOptionName . '[' . $args['key'] . ']" value="true" />' . "\n";
+    }
     echo '<span class="description">Last Cached: ' . ($args['timestamp'] == 0 ? 'Never' : date( get_option('date_format') . ' ' . get_option('time_format'), $args['timestamp'] )) . '</span>' . "\n";
   }
   
@@ -130,12 +141,20 @@ abstract class MySocial {
   function settingsResetCache( $values ) {
     if ( is_admin() && isset($_POST) && isset($_POST['option_page']) && $_POST['option_page'] == Bubs_Social_Plugin::$optionGroupName && is_array($values) ) {
       foreach ( $values as $key => $val ) {
-        // Here $values corresponds to the checked checkboxes
-        // $key = subcache, $val = "true"
-        if ( isset($this->cache[$key]) )
+        // Here $values corresponds to the checked checkboxes and radio buttons
+        // $key = subcache, $val = "delete" || "no_delete" || "do_nothing" (for Dribbble Likes) || "true" (for everything else)
+        if ( isset($this->cache[$key]) && $val != 'do_nothing' )
           $this->cache[$key] = array( 'timestamp' => 0, 'items' => array() );
       }
-    }
+    }    
+    // echo '<h1>Post</h1>';
+    // echo '<pre>';
+    // print_r($_POST);
+    // echo '</pre>';
+    // echo '<h1>Values</h1>';
+    // echo '<pre>';
+    // print_r($values);
+    // echo '</pre>';   
     return $this->cache;
   }
   
