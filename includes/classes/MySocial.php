@@ -44,7 +44,7 @@ abstract class MySocial {
    * @param array $keys Array containing the names of the sub-caches (i.e. indices)
    */
   protected function initCache( $keys ) {
-    $default_cache = array_fill_keys( $keys, array('timestamp' => 0, 'items' => array()) );
+    $default_cache = array_fill_keys( array_map('strtolower', $keys), array('timestamp' => 0, 'items' => array()) );
     $this->cache = get_option( $this->cacheOptionName, $default_cache );
     
     // In case get_option() fails to return an array
@@ -114,7 +114,7 @@ abstract class MySocial {
    * @param array $args Set via add_settings_field() in MySocial::initSettingsPage()
    */
   function settingsField( $args ) {
-    if ( strtolower($this->service) == 'dribbble' && strtolower($args['key']) == 'likes' ) {
+    if ( strtolower($this->service) == 'dribbble' && $args['key'] == 'likes' ) {
       // 75x75px Dribbble thumbnails are created & stored locally
       echo '<input type="radio" id="' . $args['id'] . '-delete" name="' . $this->cacheOptionName . '[likes]" value="delete" />' . "\n";
       echo '<label for="' . $args['id'] . '-delete">And also delete cached thumbnails</label><br />' . "\n";
@@ -143,18 +143,13 @@ abstract class MySocial {
       foreach ( $values as $key => $val ) {
         // Here $values corresponds to the checked checkboxes and radio buttons
         // $key = subcache, $val = "delete" || "no_delete" || "do_nothing" (for Dribbble Likes) || "true" (for everything else)
-        if ( isset($this->cache[$key]) && $val != 'do_nothing' )
+        if ( isset($this->cache[$key]) && $val != 'do_nothing' ) {
           $this->cache[$key] = array( 'timestamp' => 0, 'items' => array() );
+          if ( $val == 'delete' && strtolower($this->service) == 'dribbble' && $key == 'likes' )
+            $this->emptyCacheFolder();
+        }
       }
-    }    
-    // echo '<h1>Post</h1>';
-    // echo '<pre>';
-    // print_r($_POST);
-    // echo '</pre>';
-    // echo '<h1>Values</h1>';
-    // echo '<pre>';
-    // print_r($values);
-    // echo '</pre>';   
+    }  
     return $this->cache;
   }
   

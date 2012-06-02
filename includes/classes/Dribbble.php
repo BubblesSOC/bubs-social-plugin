@@ -82,8 +82,8 @@ class MyDribbble extends MySocial {
     $matches = array_map( 'strtolower', $matches );
     // $matches[1] = filename (w/extension)
     // $matches[2] = extension
-    $abs_path = BSP_DIR_PATH . "includes/images/cache/{$image_info['id']}-{$matches[1]}";
-    $rel_path = BSP_DIR_URL  . "includes/images/cache/{$image_info['id']}-{$matches[1]}";
+    $abs_path = BSP_DIR_PATH . "includes/images/cache/dribbble/{$image_info['id']}-{$matches[1]}";
+    $rel_path = BSP_DIR_URL  . "includes/images/cache/dribbble/{$image_info['id']}-{$matches[1]}";
     if ( file_exists($abs_path) ) {
       $image_info['cache_url'] = $rel_path;
       return $image_info;
@@ -152,6 +152,22 @@ class MyDribbble extends MySocial {
   	
   	$image_info['cache_url'] = $rel_path;
     return $image_info;
+  }
+  
+  /**
+   * Deletes any thumbnails from the Dribbble cache folder 
+   */
+  function emptyCacheFolder() {
+    $dir = BSP_DIR_PATH . "includes/images/cache/dribbble/";
+    if ( is_dir($dir) && $dh = opendir($dir) ) {
+      while ( ($file = readdir($dh)) !== false ) {
+        $abs_path = $dir . $file;
+        $pattern = '/^[^\.]+\.(png|jpg|jpeg|gif)$/i';
+        if ( is_file($abs_path) && preg_match($pattern, $file) == 1 && getimagesize($abs_path) )
+          unlink($abs_path);
+      }
+      closedir($dh);
+    }
   }
 }
 ?>
