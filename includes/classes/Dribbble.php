@@ -34,6 +34,7 @@ class MyDribbble extends MySocial {
     $items = array();
     foreach ( $response->shots as $shot ) {
       $image = $this->_resizeShot(array(
+        'id' => $shot->id,
         'url' => $shot->image_url,
         'width' => $shot->width,
         'height' => $shot->height,
@@ -74,23 +75,22 @@ class MyDribbble extends MySocial {
   private function _resizeShot( $image_info ) {
     
     // Get unique filename from image url
-    $pattern = '/^http:\/\/dribbble\.com\/system\/users\/\d+\/screenshots\/(\d+)\/([^\.]+\.(png|jpg|jpeg|gif))/i';
-    if ( preg_match( $pattern, $image_info['url'], $matches ) == 0 || count($matches) != 4 ) {
+    $pattern = '/\/([^\.\/]+\.(png|jpg|jpeg|gif))\?\d+$/i';
+    if ( preg_match( $pattern, $image_info['url'], $matches ) == 0 || count($matches) != 3 ) {
       return $image_info;
     }
     $matches = array_map( 'strtolower', $matches );
-    // $matches[1] = unique int identifier
-    // $matches[2] = filename (w/extension)
-    // $matches[3] = extension
-    $abs_path = BSP_DIR_PATH . "includes/images/cache/{$matches[1]}-{$matches[2]}";
-    $rel_path = BSP_DIR_URL  . "includes/images/cache/{$matches[1]}-{$matches[2]}";
+    // $matches[1] = filename (w/extension)
+    // $matches[2] = extension
+    $abs_path = BSP_DIR_PATH . "includes/images/cache/{$image_info['id']}-{$matches[1]}";
+    $rel_path = BSP_DIR_URL  . "includes/images/cache/{$image_info['id']}-{$matches[1]}";
     if ( file_exists($abs_path) ) {
       $image_info['cache_url'] = $rel_path;
       return $image_info;
     }
     
     // Create local copy
-    switch ( $matches[3] ) {
+    switch ( $matches[2] ) {
       case 'png':
         $im = imagecreatefrompng( $image_info['url'] );
         break;
@@ -135,7 +135,7 @@ class MyDribbble extends MySocial {
     $square = imagecreatetruecolor( 75, 75 );
     imagecopyresampled( $square, $thumb, 0, 0, $x, $y, 75, 75, 75, 75 );
     
-    switch ( $matches[3] ) {
+    switch ( $matches[2] ) {
       case 'png':
         imagepng( $square, $abs_path );
         break;
