@@ -166,8 +166,7 @@ class MyDribbble extends MySocial {
     if ( is_dir($this->_cacheDirPath) && $dh = opendir($this->_cacheDirPath) ) {
       while ( ($file = readdir($dh)) !== false ) {
         $abs_path = $this->_cacheDirPath . $file;
-        $pattern = '/^[^\.]+\.(png|jpg|jpeg|gif)$/i';
-        if ( is_file($abs_path) && preg_match($pattern, $file) == 1 && getimagesize($abs_path) )
+        if ( is_file($abs_path) && preg_match('/^[^\.]+\.(?:png|jpg|jpeg|gif)$/i', $file) == 1 && getimagesize($abs_path) )
           unlink($abs_path);
       }
       closedir($dh);
