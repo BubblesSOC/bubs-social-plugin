@@ -79,23 +79,21 @@ class MyDribbble extends MySocial {
    */
   private function _resizeShot( $image_info ) {
     
-    // Get unique filename from image url
-    $pattern = '/\/([^\.\/]+\.(png|jpg|jpeg|gif))\?\d+$/i';
-    if ( preg_match( $pattern, $image_info['url'], $matches ) == 0 || count($matches) != 3 ) {
+    // Get file extension from image url
+    $pattern = '/\/[^\.\/]+\.(png|jpg|jpeg|gif)\?\d+$/i';
+    if ( preg_match( $pattern, $image_info['url'], $matches ) == 0 ) {
       return $image_info;
     }
-    $matches = array_map( 'strtolower', $matches );
-    // $matches[1] = filename (w/extension)
-    // $matches[2] = extension
-    $abs_path = "{$this->_cacheDirPath}{$image_info['id']}-{$matches[1]}";
-    $rel_path = "{$this->_cacheDirUrl}{$image_info['id']}-{$matches[1]}";
+    $extension = strtolower( $matches[1] );
+    $abs_path = "{$this->_cacheDirPath}{$image_info['id']}.{$extension}";
+    $rel_path = "{$this->_cacheDirUrl}{$image_info['id']}.{$extension}";
     if ( file_exists($abs_path) ) {
       $image_info['cache_url'] = $rel_path;
       return $image_info;
     }
     
     // Create local copy
-    switch ( $matches[2] ) {
+    switch ( $extension ) {
       case 'png':
         $im = imagecreatefrompng( $image_info['url'] );
         break;
@@ -140,7 +138,7 @@ class MyDribbble extends MySocial {
     $square = imagecreatetruecolor( 75, 75 );
     imagecopyresampled( $square, $thumb, 0, 0, $x, $y, 75, 75, 75, 75 );
     
-    switch ( $matches[2] ) {
+    switch ( $extension ) {
       case 'png':
         imagepng( $square, $abs_path );
         break;
