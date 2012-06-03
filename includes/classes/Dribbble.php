@@ -80,6 +80,7 @@ class MyDribbble extends MySocial {
   private function _resizeShot( $image_info ) {
     
     // Get file extension from image url
+    // Ex. http://dribbble.com/system/assets/2067/57237/screenshots/534150/bookfairy.jpg?1335480180
     $pattern = '/\/[^\.\/]+\.(png|jpg|jpeg|gif)\?\d+$/i';
     if ( preg_match( $pattern, $image_info['url'], $matches ) == 0 ) {
       return $image_info;

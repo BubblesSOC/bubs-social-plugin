@@ -111,6 +111,7 @@ abstract class MySocial {
   /**
    * Displays the checkbox or radio buttons corresponding to a subcache on the WordPress Settings Page
    *
+   * @todo  Make the timestamp display properly
    * @param array $args Set via add_settings_field() in MySocial::initSettingsPage()
    */
   function settingsField( $args ) {
