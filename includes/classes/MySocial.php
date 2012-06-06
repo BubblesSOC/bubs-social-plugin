@@ -295,6 +295,10 @@ abstract class MySocial {
             // White Heart Suit
             $new_str .= '&#9825;';
           }
+          elseif ( ord($byte3) == hexdec('a5') ) {
+            // Black Heart Suit
+            $new_str .= '&hearts;';
+          }
           elseif ( ord($byte3) == hexdec('ab') ) {
             // Beamed Eighth Notes
             $new_str .= '&#9835;';
