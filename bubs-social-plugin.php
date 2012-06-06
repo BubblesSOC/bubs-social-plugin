@@ -18,6 +18,7 @@ require_once('includes/classes/Github.php');
 require_once('includes/classes/GooglePlus.php');
 // require_once('includes/classes/Pinterest.php');
 require_once('includes/classes/Tumblr.php');
+require_once('includes/classes/Twitpic.php');
 require_once('includes/classes/Twitter.php');
 
 define('BSP_PLUGIN_SLUG', "bubs-social-plugin");
@@ -40,6 +41,7 @@ class Bubs_Social_Plugin {
   private $_myGooglePlus;
   private $_myPinterest;
   private $_myTumblr;
+  private $_myTwitpic;
   private $_myTwitter;
   
   private $_settingsPageHook;
@@ -53,6 +55,7 @@ class Bubs_Social_Plugin {
     $this->_myGooglePlus = new MyGooglePlus();
     // $this->_myPinterest = new MyPinterest();
     $this->_myTumblr = new MyTumblr();
+    $this->_myTwitpic = new MyTwitpic();
     $this->_myTwitter = new MyTwitter();
     
     // Admin & Social JS
