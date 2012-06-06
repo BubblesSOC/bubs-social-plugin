@@ -38,6 +38,13 @@ abstract class MySocial {
   protected $cache;
   
   /**
+   * Should a WordPress Settings Page be initialized for this cache?
+   *
+   * @var boolean
+   */
+  protected $initSettingsPage = false;
+  
+  /**
    * Initializes the cache array
    *
    * @uses MySocial::$cacheOptionName
@@ -88,12 +95,14 @@ abstract class MySocial {
   /**
    * Initializes the WordPress Settings Page section for the cache
    *
+   * @uses MySocial::$initSettingsPage
    * @uses MySocial::settingsSectionContent()
    * @uses MySocial::settingsField()
    * @uses MySocial::settingsResetCache()
    * @uses Bubs_Social_Plugin::$optionGroupName
    */
   function initSettingsPage() {
+    if ( !$this->initSettingsPage ) return;
     $section_id = 'bsp-reset-' . strtolower($this->service) . '-cache';
     add_settings_section( $section_id, ucfirst($this->service), array($this, 'settingsSectionContent'), BSP_PLUGIN_SLUG );
     foreach ( $this->cache as $key => $cache ) {

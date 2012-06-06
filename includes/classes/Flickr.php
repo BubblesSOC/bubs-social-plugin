@@ -10,6 +10,7 @@ class MyFlickr extends MySocial {
     $this->service = 'Flickr';
     $this->apiUrl = "http://api.flickr.com/services/rest/?api_key=" . FLICKR_API_KEY . "&format=json&nojsoncallback=1";
     $this->cacheOptionName = 'flickr_cache';
+    $this->initSettingsPage = true;
     $this->initCache( array('public_photos', 'favorites') );
     $this->hookAjax('bsp-print-photos', 'printPublicPhotos');
   }

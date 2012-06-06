@@ -16,6 +16,7 @@ class MyTwitter extends MySocial_Oauth {
       'access_secret' => TWITTER_ACCESS_TOKEN_SECRET
     );
     $this->cacheOptionName = 'twitter_cache';
+    $this->initSettingsPage = true;
     $this->initCache( array('user_timeline') );
     $this->hookAjax('bsp-print-tweets', 'printUserTimeline');
     

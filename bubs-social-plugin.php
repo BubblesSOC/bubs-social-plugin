@@ -120,11 +120,10 @@ EOD;
    * Admin Settings/Options Page
    */
   function initSettingsPage() {
-    $this->_myDribbble->initSettingsPage();
-    $this->_myFlickr->initSettingsPage();
-    $this->_myGithub->initSettingsPage();
-    $this->_myTumblr->initSettingsPage();
-    $this->_myTwitter->initSettingsPage();
+    foreach ( get_object_vars($this) as $prop => $val ) {
+      if ( method_exists($this->$prop, 'initSettingsPage') )
+        $this->$prop->initSettingsPage();
+    }
   }
   
   function addSettingsPage() {

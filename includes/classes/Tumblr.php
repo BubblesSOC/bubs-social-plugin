@@ -16,6 +16,7 @@ class MyTumblr extends MySocial_Oauth {
       'access_secret' => TUMBLR_ACCESS_TOKEN_SECRET
     );
     $this->cacheOptionName = 'tumblr_cache';
+    $this->initSettingsPage = true;
     $this->initCache( array('likes') );
   }
   

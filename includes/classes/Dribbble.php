@@ -13,6 +13,7 @@ class MyDribbble extends MySocial {
     $this->service = 'Dribbble';
     $this->apiUrl = "http://api.dribbble.com/";
     $this->cacheOptionName = 'dribbble_cache';
+    $this->initSettingsPage = true;
     $this->initCache( array('likes') );
     $this->_cacheDirPath = BSP_DIR_PATH . "includes/images/cache/dribbble/";
     $this->_cacheDirUrl  = BSP_DIR_URL  . "includes/images/cache/dribbble/";

@@ -11,6 +11,7 @@ class MyGithub extends MySocial {
     $this->service = 'Github';
     $this->apiUrl = "https://api.github.com/";
     $this->cacheOptionName = 'github_cache';
+    $this->initSettingsPage = true;
     $this->initCache( array('public_repos') );
     $this->hookAjax('bsp-print-repos', 'printPublicRepos');
   }
