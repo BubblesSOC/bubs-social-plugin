@@ -64,7 +64,7 @@ class MyFlickr extends MySocial {
     return $items;
   }
   
-  function getLikesCache() {
+  function getFavoritesCache() {
     $this->_getFavorites();
     return $this->cache['favorites']['items'];
   }

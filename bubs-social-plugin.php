@@ -327,11 +327,11 @@ EOD;
    *
    * @uses MyTumblr::getLikesCache()
    * @uses MyDribbble::getLikesCache()
-   * @uses MyFlickr::getLikesCache()
+   * @uses MyFlickr::getFavoritesCache()
    * @uses Bubs_Social_Plugin::compareTimestamps()
    */
   function printLikes() {
-    $likes = array_merge( $this->_myTumblr->getLikesCache(), $this->_myDribbble->getLikesCache(), $this->_myFlickr->getLikesCache() );
+    $likes = array_merge( $this->_myTumblr->getLikesCache(), $this->_myDribbble->getLikesCache(), $this->_myFlickr->getFavoritesCache() );
     usort( $likes, array('Bubs_Social_Plugin', 'compareTimestamps') );
     $likes = array_slice( $likes, 0, 5 );
     foreach ( $likes as $like ) {

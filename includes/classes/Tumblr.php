@@ -81,6 +81,7 @@ class MyTumblr extends MySocial_Oauth {
           'type' => $post->type,
           'date' => $post->date,
           'timestamp' => time(),
+          'photoset_layout' => null,
           'photos' => array()
         );
         // Parse Photos
@@ -101,9 +102,13 @@ class MyTumblr extends MySocial_Oauth {
           $item['photoset_layout'] = $post->photoset_layout;
         }
         // Check if item is already cached
-        $id = (string) $post->id;
+        $id = "{$item['service']}_{$post->id}";
         if ( array_key_exists($id, $this->cache['likes']['items']) ) {
           $item['timestamp'] = $this->cache['likes']['items'][$id]['timestamp'];
+        }
+        // Check if this is a first fetch
+        elseif ( $this->cache['likes']['timestamp'] == 0 ) {
+          $item['timestamp'] = strtotime($post->date);
         }
         $items[$id] = $item;
       }

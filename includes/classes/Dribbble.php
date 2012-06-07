@@ -60,9 +60,13 @@ class MyDribbble extends MySocial {
         )
       );
       // Check if item is already cached
-      $id = (string) $shot->id;
+      $id = "{$item['service']}_{$shot->id}";
       if ( array_key_exists($id, $this->cache['likes']['items']) ) {
         $item['timestamp'] = $this->cache['likes']['items'][$id]['timestamp'];
+      }
+      // Check if this is a first fetch
+      elseif ( $this->cache['likes']['timestamp'] == 0 ) {
+        $item['timestamp'] = strtotime($shot->created_at);
       }
       $items[$id] = $item;
     }
