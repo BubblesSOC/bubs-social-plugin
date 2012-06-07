@@ -38,8 +38,8 @@ class MyTwitpic extends MySocial {
       $item = array(
         'service' => strtolower($this->service),
         'short_id' => $image->short_id,
-        'message' => $this->convertChars( $image->message ),
-        'timestamp' => $image->timestamp,
+        'message' => $this->convertChars( rtrim($image->message, ':') ),
+        'timestamp' => strtotime($image->timestamp),
         'link' => "http://twitpic.com/{$image->short_id}",
         'thumb' => "http://twitpic.com/show/mini/{$image->short_id}"
       );

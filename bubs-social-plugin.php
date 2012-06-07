@@ -83,6 +83,10 @@ class Bubs_Social_Plugin {
   	// Hook Ajax for Likes
   	add_action('wp_ajax_nopriv_bsp-print-likes', array($this, 'printLikes'));
     add_action('wp_ajax_bsp-print-likes', array($this, 'printLikes'));
+    
+    // Hook Ajax for Photos
+    add_action('wp_ajax_nopriv_bsp-print-social-photos', array($this, 'printPhotos'));
+    add_action('wp_ajax_bsp-print-social-photos', array($this, 'printPhotos'));
   }
   
   function socialJS() {
@@ -350,6 +354,33 @@ EOD;
         $href = $like['link'];
         $src = $like['url_sq'];
         $alt = "{$like['title']} by {$like['owner_name']} on Flickr";
+      }
+      echo '<li><a href="'. $href .'" title="'. $alt .'"><img src="'. $src .'" alt="'. $alt .'" /></a></li>' . "\n";
+    }
+    exit;
+  }
+  
+  /**
+   * Aggregates & displays photos I've uploaded across social sites
+   *
+   * @uses MyFlickr::getPublicPhotosCache()
+   * @uses MyTwitpic::getImagesCache()
+   * @uses Bubs_Social_Plugin::compareTimestamps()
+   */
+  function printPhotos() {
+    $photos = array_merge( $this->_myFlickr->getPublicPhotosCache(), $this->_myTwitpic->getImagesCache() );
+    usort( $photos, array('Bubs_Social_Plugin', 'compareTimestamps') );
+    $photos = array_slice( $photos, 0, 5 );
+    foreach ( $photos as $photo ) {
+      if ( $photo['service'] == 'flickr' ) {
+        $href = $photo['link'];
+        $src = $photo['url_sq'];
+        $alt = "{$photo['title']}, on Flickr";
+      }
+      elseif ( $photo['service'] == 'twitpic' ) {
+        $href = $photo['link'];
+        $src = $photo['thumb'];
+        $alt = "{$photo['message']}, on TwitPic";
       }
       echo '<li><a href="'. $href .'" title="'. $alt .'"><img src="'. $src .'" alt="'. $alt .'" /></a></li>' . "\n";
     }

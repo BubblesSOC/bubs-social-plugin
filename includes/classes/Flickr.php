@@ -33,6 +33,11 @@ class MyFlickr extends MySocial {
     exit;
   }
   
+  function getPublicPhotosCache() {
+    $this->_getPublicPhotos();
+    return $this->cache['public_photos']['items'];
+  }
+  
   private function _getPublicPhotos() {
     // Ref: http://www.flickr.com/services/api/flickr.people.getPublicPhotos.html
     $params = array(
@@ -48,9 +53,10 @@ class MyFlickr extends MySocial {
     $items = array();
     foreach ( $response->photos->photo as $photo ) {
       $item = array(
+        'service' => strtolower($this->service),
         'link' => "http://www.flickr.com/photos/bubblessoc/{$photo->id}/",
         'title' => $photo->title,
-        'dateupload' => $photo->dateupload,
+        'timestamp' => $photo->dateupload,
         'url_sq' => $photo->url_sq
       );
       array_push($items, $item);
