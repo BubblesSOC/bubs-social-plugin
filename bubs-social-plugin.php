@@ -266,6 +266,7 @@ EOD;
     <li>
       <input type="radio" id="comment-via-wordpress" name="social[comment_via]" value="wordpress" checked />
       <label for="comment-via-wordpress">WordPress</label>
+    </li>
     <li>
       <a href="#" id="twitter-connect">Connect with Twitter</a>
       <div id="twitter-userinfo" class="social-userinfo">
