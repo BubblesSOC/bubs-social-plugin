@@ -250,7 +250,7 @@ abstract class MySocial {
         return $response;
       
       // Update Cache
-      $this->updateCache( $key, call_user_func_array( array($this, $parse_method), array($response) ) );
+      $this->updateCache( $key, call_user_func( array($this, $parse_method), $response ) );
     }
     // Else: Use Cache
     return true;
