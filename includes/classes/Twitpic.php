@@ -16,6 +16,9 @@ class MyTwitpic extends MySocial {
 
   protected function checkServiceError( $response ) {
     $response_body = json_decode( $response['body'] );
+    if ( $response['response']['code'] != '200' ) {
+      return new WP_Error( 'service_error', $response['response']['message'] );
+    }
     if ( isset($response_body->errors) && is_array($response_body->errors) ) {
       return new WP_Error( 'service_error', $response_body->errors[0]->message );
     }
