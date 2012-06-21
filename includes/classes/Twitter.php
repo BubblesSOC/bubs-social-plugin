@@ -287,7 +287,7 @@ EOD;
         $href .= "/status/{$tweet['in_reply_to_status_id']}";
       }
       $display = '<a href="'. $href .'" class="tweep">@'. $mention['screen_name'] .'</a>';
-      $tweet['text'] = str_replace( "@{$mention['screen_name']}", $display, $tweet['text'] );
+      $tweet['text'] = str_ireplace( "@{$mention['screen_name']}", $display, $tweet['text'] );
     }
     return $tweet;
   }
@@ -296,7 +296,7 @@ EOD;
     // Ref: https://dev.twitter.com/docs/api/1/get/statuses/user_timeline
     $params = array(
       'count' => 5,
-      'trim_user' => true,
+      'trim_user' => false,
       'include_rts' => true,
       'include_entities' => true
     );
@@ -310,33 +310,42 @@ EOD;
         'id' => $tweet->id_str,
         'in_reply_to_status_id' => $tweet->in_reply_to_status_id_str,
         'in_reply_to_screen_name' => $tweet->in_reply_to_screen_name,
+        'created_at' => $tweet->created_at,
         'text' => $this->convertChars( $tweet->text ),
-        'created_at' => $tweet->created_at
+        'entities' => $this->_parseTweetEntities( $tweet->entities )
       );
       if ( isset($tweet->retweeted_status) ) {
+        $item['text'] = "RT @{$tweet->retweeted_status->user->screen_name}: " . $this->convertChars( $tweet->retweeted_status->text );
         $item['retweeted_status_id'] = $tweet->retweeted_status->id_str;
-      }
-      // Entities
-      // Ref: https://dev.twitter.com/docs/tweet-entities
-      $item['entities'] = array(
-        'urls' => array(),
-        'user_mentions' => array(),
-        'hashtags' => array()
-      );
-      foreach ( $tweet->entities->urls as $url ) {
-        unset($url->indices);
-        array_push( $item['entities']['urls'], (array) $url ); 
-      }
-      foreach ( $tweet->entities->user_mentions as $mention ) {
-        array_push( $item['entities']['user_mentions'], array('screen_name' => $mention->screen_name) );
-      }
-      foreach ( $tweet->entities->hashtags as $tag ) {
-        unset($tag->indices);
-        array_push( $item['entities']['hashtags'], (array) $tag );
+        $item['entities'] = $this->_parseTweetEntities( $tweet->retweeted_status->entities, $item['entities'] );
       }
       array_push($items, $item);
     }
     return $items;
+  }
+  
+  private function _parseTweetEntities( $entities, $ent_arr = null ) {
+    // Entities
+    // Ref: https://dev.twitter.com/docs/tweet-entities
+    if ( is_null($ent_arr) ) {
+      $ent_arr = array(
+        'urls' => array(),
+        'user_mentions' => array(),
+        'hashtags' => array()
+      );
+    }
+    foreach ( $entities->urls as $url ) {
+      unset($url->indices);
+      array_push( $ent_arr['urls'], (array) $url ); 
+    }
+    foreach ( $entities->user_mentions as $mention ) {
+      array_push( $ent_arr['user_mentions'], array('screen_name' => $mention->screen_name) );
+    }
+    foreach ( $entities->hashtags as $tag ) {
+      unset($tag->indices);
+      array_push( $ent_arr['hashtags'], (array) $tag );
+    }
+    return $ent_arr;
   }
 }
 ?>
