@@ -361,7 +361,7 @@ EOD;
     foreach ( $likes as $like ) {
       if ( $like['service'] == 'dribbble' ) {
         $href = $like['url'];
-        if ( is_null($like['image']['cache_url']) ) {
+        if ( is_null($like['image']['cache_url']) || !$this->_myDribbble->thumbnailExists($like['image']['cache_url']) ) {
           $src = $like['image']['teaser_url'];
         }
         else {

@@ -178,5 +178,17 @@ class MyDribbble extends MySocial {
       closedir($dh);
     }
   }
+  
+  /**
+   * Checks to see if the given thumbnail exists in the Dribbble cache folder
+   *
+   * @see BubsSocialPlugin::printLikes()
+   * @param string $cache_url Relative path to the thumbnail stored in the Likes cache
+   * @return boolean
+   */
+  function thumbnailExists( $cache_url ) {
+    $abs_path = str_replace( $this->_cacheDirUrl, $this->_cacheDirPath, $cache_url );
+    return @getimagesize($abs_path);
+  }
 }
 ?>
