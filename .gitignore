@@ -1,6 +1,6 @@
 includes/oauth_keys.php
 includes/classes/Goodreads.php
-includes/classes/Pinterest.php
+includes/classes/Pinterest-old.php
 includes/images/cache/*.jpg
 includes/images/cache/*.jpeg
 includes/images/cache/*.png

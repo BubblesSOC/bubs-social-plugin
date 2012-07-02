@@ -16,7 +16,7 @@ require_once('includes/classes/Facebook.php');
 require_once('includes/classes/Flickr.php');
 require_once('includes/classes/Github.php');
 require_once('includes/classes/GooglePlus.php');
-// require_once('includes/classes/Pinterest.php');
+require_once('includes/classes/Pinterest.php');
 require_once('includes/classes/Tumblr.php');
 require_once('includes/classes/Twitpic.php');
 require_once('includes/classes/Twitter.php');
@@ -53,7 +53,7 @@ class Bubs_Social_Plugin {
     $this->_myFlickr = new MyFlickr();
     $this->_myGithub = new MyGithub();
     $this->_myGooglePlus = new MyGooglePlus();
-    // $this->_myPinterest = new MyPinterest();
+    $this->_myPinterest = new MyPinterest();
     $this->_myTumblr = new MyTumblr();
     $this->_myTwitpic = new MyTwitpic();
     $this->_myTwitter = new MyTwitter();
