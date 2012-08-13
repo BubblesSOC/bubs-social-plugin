@@ -6,6 +6,9 @@
  * @since 1.0
  */
 class MyPinterest extends MySocial {
+  private $_cacheDirPath;
+  private $_cacheDirUrl;
+  
   function __construct() {
     $this->service = 'Pinterest';
     $this->apiUrl = '';
@@ -14,6 +17,8 @@ class MyPinterest extends MySocial {
     $this->initCache( array('pins') );
     $this->hookAjax('bsp-print-pins', 'printPins');
     add_action( 'wp_enqueue_scripts', array($this, 'pinButtonJS') );
+    $this->_cacheDirPath = BSP_DIR_PATH . "includes/images/cache/pinterest/";
+    $this->_cacheDirUrl  = BSP_DIR_URL  . "includes/images/cache/pinterest/";
   }
   
   protected function checkServiceError( $response ) {
@@ -34,6 +39,7 @@ class MyPinterest extends MySocial {
   
   function printPins() {
     $result = $this->_getPinFeed();
+    $this->printStatus($result);
     foreach ( $this->cache['pins']['items'] as $pin ) {
       echo '<li><a href="'. $pin['link'] .'"><img src="'. $pin['image'] .'" alt="" /></a></li>' . "\n";
     }
@@ -41,13 +47,13 @@ class MyPinterest extends MySocial {
   }
   
   private function _getPinFeed() {
-    return $this->fetchItems( 'pins', 'parsePinFeedResponse', 'http://pinterest.com/bubblessoc/feed.rss', 1 );
+    return $this->fetchItems( 'pins', 'parsePinFeedResponse', 'http://pinterest.com/bubblessoc/feed.rss',1 );
   }
   
   function parsePinFeedResponse( $response ) {
     $items = array();
     foreach ( $response->channel->item as $pin ) {
-      preg_match( '/^<p><a href="[^"]+"><img src="([^"]+)"><\/a><\/p>/i', (string) $pin->description, $matches );
+      preg_match( '/src="([^"]+)"/i', (string) $pin->description, $matches );
       $item = array(
         'title' => (string) $pin->title,
         'link' => (string) $pin->link,

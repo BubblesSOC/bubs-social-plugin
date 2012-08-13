@@ -9,5 +9,9 @@ includes/images/cache/dribbble/*.jpg
 includes/images/cache/dribbble/*.jpeg
 includes/images/cache/dribbble/*.png
 includes/images/cache/dribbble/*.gif
+includes/images/cache/pinterest/*.jpg
+includes/images/cache/pinterest/*.jpeg
+includes/images/cache/pinterest/*.png
+includes/images/cache/pinterest/*.gif
 includes/js/bsp-tumblr-admin.*
 old/*
