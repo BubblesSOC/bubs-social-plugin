@@ -68,6 +68,9 @@ class Bubs_Social_Plugin {
     add_action('admin_menu', array($this, 'addSettingsPage'));
     add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'linkSettingsPage'));
     add_action('admin_bar_menu', array($this, 'adminBarMenu'), 999);
+    
+    // Widgets
+    add_action( 'widgets_init', array($this, 'initWidgets') );
 
     // Comment via Social
     add_filter('wp_get_current_commenter', array($this, 'social_getCurrentCommenter'));
@@ -189,6 +192,18 @@ submit_button('Reset Cache');
         'href' => admin_url( 'options-general.php?page='. BSP_PLUGIN_SLUG )
       ));
     }
+  }
+
+  /**
+   * Initializes the WordPress widgets
+   */
+  function initWidgets() {
+    foreach ( get_object_vars($this) as $prop => $val ) {
+      if ( method_exists($this->$prop, 'initWidget') )
+        $this->$prop->initWidget();
+    }
+    register_widget( 'BSP_Likes_Widget' );
+    register_widget( 'BSP_SocialPhotos_Widget' );
   }
   
   /**
@@ -420,6 +435,30 @@ EOD;
     }
     // want descending order
     return ( $a['timestamp'] > $b['timestamp'] ) ? -1 : 1;
+  }
+}
+
+/**
+ * BSP_Likes_Widget Class
+ *
+ * @package Bubs_Social_Plugin
+ * @since 1.0
+ */
+class BSP_Likes_Widget extends MySocial_Widget {
+  function __construct() {
+    parent::registerWidget( 'likes', 'Likes', "Aggregates & displays images you've favorited across social sites" );
+  }
+}
+
+/**
+ * BSP_SocialPhotos_Widget Class
+ *
+ * @package Bubs_Social_Plugin
+ * @since 1.0
+ */
+class BSP_SocialPhotos_Widget extends MySocial_Widget {
+  function __construct() {
+    parent::registerWidget( 'social-photos', 'Social Photos', "Aggregates & displays photos you've uploaded across social sites" );
   }
 }
 

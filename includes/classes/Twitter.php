@@ -3,6 +3,7 @@
  * MyTwitter Class
  *
  * @package Bubs_Social_Plugin
+ * @subpackage MyTwitter
  * @since 1.0
  */
 class MyTwitter extends MySocial_Oauth {
@@ -17,6 +18,7 @@ class MyTwitter extends MySocial_Oauth {
     );
     $this->cacheOptionName = 'twitter_cache';
     $this->initSettingsPage = true;
+    $this->widgetClassName = 'MyTwitter_Widget';
     $this->initCache( array('user_timeline') );
     $this->hookAjax('bsp-print-tweets', 'printUserTimeline');
     
@@ -346,6 +348,19 @@ EOD;
       array_push( $ent_arr['hashtags'], (array) $tag );
     }
     return $ent_arr;
+  }
+}
+
+/**
+ * MyTwitter_Widget Class
+ *
+ * @package Bubs_Social_Plugin
+ * @subpackage MyTwitter
+ * @since 1.0
+ */
+class MyTwitter_Widget extends MySocial_Widget {
+  function __construct() {
+    parent::registerWidget( 'twitter', 'Twitter', 'Your most recent tweets' );
   }
 }
 ?>

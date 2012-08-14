@@ -3,6 +3,7 @@
  * MyGithub Class
  *
  * @package Bubs_Social_Plugin
+ * @subpackage MyGithub
  * @since 1.0
  */
 
@@ -12,6 +13,7 @@ class MyGithub extends MySocial {
     $this->apiUrl = "https://api.github.com/";
     $this->cacheOptionName = 'github_cache';
     $this->initSettingsPage = true;
+    $this->widgetClassName = 'MyGithub_Widget';
     $this->initCache( array('public_repos') );
     $this->hookAjax('bsp-print-repos', 'printPublicRepos');
   }
@@ -55,6 +57,19 @@ class MyGithub extends MySocial {
     }
     usort( $items, array('Bubs_Social_Plugin', 'compareTimestamps') );
     return array_slice( $items, 0, 5 );
+  }
+}
+
+/**
+ * MyGithub_Widget Class
+ *
+ * @package Bubs_Social_Plugin
+ * @subpackage MyGithub
+ * @since 1.0
+ */
+class MyGithub_Widget extends MySocial_Widget {
+  function __construct() {
+    parent::registerWidget( 'github', 'Github', 'Your most recently updated repos' );
   }
 }
 ?>

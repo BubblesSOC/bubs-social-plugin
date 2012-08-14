@@ -45,6 +45,14 @@ abstract class MySocial {
   protected $initSettingsPage = false;
   
   /**
+   * Name of the service's WordPress widget class
+   *
+   * @todo Allow for multiple widgets
+   * @var string
+   */
+  protected $widgetClassName = null;
+  
+  /**
    * Initializes the cache array
    *
    * @uses MySocial::$cacheOptionName
@@ -137,6 +145,17 @@ abstract class MySocial {
       echo '<input type="checkbox" id="' . $args['id'] . '" name="' . $this->cacheOptionName . '[' . $args['key'] . ']" value="true" />' . "\n";
     }
     echo '<span class="description">Last Cached: ' . ($args['timestamp'] == 0 ? 'Never' : date( get_option('date_format') . ' ' . get_option('time_format'), $args['timestamp'] )) . '</span>' . "\n";
+  }
+  
+  /**
+   * Initializes the WordPress widget for the service
+   *
+   * @todo Allow for multiple widgets
+   */
+  function initWidget() {
+    if ( !is_null($this->widgetClassName) && class_exists($this->widgetClassName) ) {
+      register_widget( $this->widgetClassName );
+    }
   }
   
   /**
@@ -345,6 +364,90 @@ abstract class MySocial_Oauth extends MySocial {
       'signatures'  => $this->signatures
     ));
     return $result['signed_url'];
+  }
+}
+
+abstract class MySocial_Widget extends WP_Widget {
+  /**
+   * ID of the widget. Overrides the generated widget ID (for my site's purposes).
+   *
+   * @var string
+   */
+  protected $widgetId;
+  
+  /**
+   * Default title of the widget
+   *
+   * @var string
+   */
+  protected $defaultTitle;
+  
+  /**
+   * Registers widget with WordPress
+   *
+   * @uses WP_Widget::__construct()
+   *
+   * @param string $widget_id Base ID for the widget, lower case
+   * @param string $name Name for the widget displayed on the configuration page.
+   * @param string $description Optional Description of the widget shown on the configuration page.
+   */
+  protected function registerWidget( $widget_id, $name, $description = null ) {
+    $widget_options = array();
+    if ( !is_null($description) ) {
+      $widget_options['description'] = $description;
+    }
+    parent::__construct( $widget_id, $name, $widget_options );
+    $this->widgetId = $widget_id;
+    $this->defaultTitle = $name;
+  }
+  
+  /**
+	 * Back-end widget form.
+	 *
+	 * @param array $instance Previously saved values from database.
+	 */
+  function form( $instance ) {
+    $title = isset( $instance['title'] ) ? esc_attr( $instance['title'] ) : esc_attr( $this->defaultTitle );
+?>
+<p>
+	<label for="<?php echo $this->get_field_id( 'title' ); ?>">Title:</label> 
+	<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo $title; ?>" />
+</p>
+<?php
+  }
+  
+  /**
+	 * Sanitize widget form values as they are saved.
+	 *
+	 * @param array $new_instance Values just sent to be saved.
+	 * @param array $old_instance Previously saved values from database.
+	 *
+	 * @return array Updated safe values to be saved.
+	 */
+  function update( $new_instance, $old_instance ) {
+    $instance = array();
+    $instance['title'] = strip_tags( preg_replace('/<3/', '&lt;3', $new_instance['title']) );
+    return $instance;
+  }
+  
+  /**
+	 * Front-end display of widget.
+	 *
+	 * @param array $args     Widget arguments.
+	 * @param array $instance Saved values from database.
+	 */
+  function widget( $args, $instance ) {
+    extract( $args );
+    $title = apply_filters( 'widget_title', empty($instance['title']) ? $this->defaultTitle : preg_replace( '/&lt;3/', '&hearts;', $instance['title'] ), $this->widgetId );
+    
+    echo str_replace( $widget_id, $this->widgetId, $before_widget ) . "\n";
+    echo $before_title . $title . $after_title . "\n";
+?>
+<ul>
+  <li><img src="<?php bloginfo('template_directory') ?>/images/ajax-loader.gif" alt="Loading..." /></li>
+</ul>
+<?php
+    echo $after_widget . "\n\n";
   }
 }
 ?>

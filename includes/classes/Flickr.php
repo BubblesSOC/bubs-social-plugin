@@ -3,6 +3,7 @@
  * MyFlickr Class
  *
  * @package Bubs_Social_Plugin
+ * @subpackage MyFlickr
  * @since 1.0
  */
 class MyFlickr extends MySocial {
@@ -11,6 +12,7 @@ class MyFlickr extends MySocial {
     $this->apiUrl = "http://api.flickr.com/services/rest/?api_key=" . FLICKR_API_KEY . "&format=json&nojsoncallback=1";
     $this->cacheOptionName = 'flickr_cache';
     $this->initSettingsPage = true;
+    $this->widgetClassName = 'MyFlickr_Widget';
     $this->initCache( array('public_photos', 'favorites') );
     $this->hookAjax('bsp-print-photos', 'printPublicPhotos');
   }
@@ -112,6 +114,19 @@ class MyFlickr extends MySocial {
       array_push($items, $item);
     }
     return $items;
+  }
+}
+
+/**
+ * MyFlickr_Widget Class
+ *
+ * @package Bubs_Social_Plugin
+ * @subpackage MyFlickr
+ * @since 1.0
+ */
+class MyFlickr_Widget extends MySocial_Widget {
+  function __construct() {
+    parent::registerWidget( 'flickr', 'Flickr', 'Your public photostream' );
   }
 }
 ?>

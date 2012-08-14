@@ -3,6 +3,7 @@
  * MyPinterest Class
  *
  * @package Bubs_Social_Plugin
+ * @subpackage MyPinterest
  * @since 1.0
  */
 class MyPinterest extends MySocial {
@@ -14,6 +15,7 @@ class MyPinterest extends MySocial {
     $this->apiUrl = '';
     $this->cacheOptionName = 'pinterest_cache';
     $this->initSettingsPage = true;
+    $this->widgetClassName = 'MyPinterest_Widget';
     $this->initCache( array('pins') );
     $this->hookAjax('bsp-print-pins', 'printPins');
     add_action( 'wp_enqueue_scripts', array($this, 'pinButtonJS') );
@@ -63,6 +65,19 @@ class MyPinterest extends MySocial {
       array_push($items, $item);
     }
     return array_slice( $items, 0, 5 );
+  }
+}
+
+/**
+ * MyPinterest_Widget Class
+ *
+ * @package Bubs_Social_Plugin
+ * @subpackage MyPinterest
+ * @since 1.0
+ */
+class MyPinterest_Widget extends MySocial_Widget {
+  function __construct() {
+    parent::registerWidget( 'pinterest', 'Pinterest', 'Your latest pins' );
   }
 }
 ?>
